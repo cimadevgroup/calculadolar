@@ -124,6 +124,12 @@
   .resline .who{font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.4px; color:var(--glow); white-space:nowrap; padding-bottom:9px}
   .resline .who.idle{color:var(--dim2)}
   .keyzone{border:1px solid transparent; border-radius:15px; padding:6px 5px 5px; margin:0 -5px -5px; transition:box-shadow .18s ease}
+  /* escribiendo en un campo de arriba solo sirven números, AC, decimal y borrar */
+  .keyzone.only-num .sendto,
+  .keyzone.only-num .chip,
+  .keyzone.only-num .key.op,
+  .keyzone.only-num .key.fn:not(.keep){opacity:.22; pointer-events:none}
+  .sendto,.chip,.key{transition:opacity .18s ease}
   .expr{
     flex:1; min-width:0; background:transparent; border:none; color:#fff; font-size:15px;
     padding:2px 2px 4px; outline:none; text-align:right; caret-color:var(--glow);
@@ -133,6 +139,7 @@
   .expr.off{opacity:.4}
   .res{flex:1; min-width:0; min-height:40px; display:flex; align-items:center; justify-content:flex-end; padding:2px 4px; font-size:32px; font-weight:300; font-variant-numeric:tabular-nums; overflow:hidden}
   .res.err{color:var(--dim2); font-size:15px}
+  .res u{font-size:14px; color:var(--dim); text-decoration:none; margin-right:5px; font-weight:600}
   .sendto{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-bottom:7px}
   .sendto button{border:1px solid var(--line); background:#2c2c2e; color:var(--dim); border-radius:9px; padding:6px 2px; font-size:10px; font-weight:700; cursor:pointer}
   .sendto button:active{background:#3a3a3c; color:#fff}
@@ -242,8 +249,8 @@
 
     <div class="keyzone" id="keyzone">
     <div class="sendto">
-      <button id="toPrice" type="button">↑ Usar como precio $</button>
-      <button id="toPay" type="button">↑ Usar como precio Bs</button>
+      <button id="toPrice" type="button">↑ Al precio en $</button>
+      <button id="toPay" type="button">↑ A pagando en Bs</button>
     </div>
 
     <div class="chips">
@@ -276,7 +283,7 @@
 
       <button class="key num" data-ins="0" type="button">0</button>
       <button class="key num" id="kDec" data-ins="," type="button">,</button>
-      <button class="key fn" id="kDel" type="button">⌫</button>
+      <button class="key fn keep" id="kDel" type="button">⌫</button>
       <button class="key op" id="kEq" type="button">=</button>
     </div>
     </div>
@@ -304,6 +311,16 @@
   var $ = function(id){ return document.getElementById(id); };
   function curr(){ return $('cur').dataset.cur; }
   function calcCur(){ return $('calcCur').dataset.cur; }
+  function setCur(u){
+    $('cur').dataset.cur = u;
+    $('curTxt').textContent = u;
+    $('payLabel').textContent = 'Pagando en ' + u;
+  }
+  function setCalcCur(u){
+    $('calcCur').dataset.cur = u;
+    $('calcCurTxt').textContent = u;
+    $('toPay').textContent = '↑ A pagando en ' + u;
+  }
 
   /* ---------- números ---------- */
   function ok(n){ return typeof n === 'number' && isFinite(n); }
@@ -418,6 +435,7 @@
     var onCalc = !!active && active.id === 'expr';
     $('pad').classList.toggle('lit-ring', onCalc);
     $('keyzone').classList.toggle('lit-ring', !!active && !onCalc);
+    $('keyzone').classList.toggle('only-num', !!active && !onCalc);
     $('disp').classList.toggle('off', !!active && !onCalc);
     $('expr').classList.toggle('off', false);
     var who = $('resFor');
@@ -619,7 +637,9 @@
       var v = evaluate(raw);
       if(!ok(v)) throw new Error('∞');
       box.className = 'res';
-      box.textContent = fmt(v, (Math.abs(v % 1) > 1e-9) ? 2 : 0);
+      var txt = fmt(v, (Math.abs(v % 1) > 1e-9) ? 2 : 0);
+      if(el.id === 'expr') box.innerHTML = '<u>' + calcCur() + '</u>' + txt;
+      else box.textContent = txt;
       box.dataset.value = v;
     }catch(e){
       box.className = 'res err';
@@ -721,18 +741,13 @@
   }, true);
 
   press($('calcCur'), function(){
-    var next = (calcCur() === 'Bs') ? '$' : 'Bs';
-    $('calcCur').dataset.cur = next;
-    $('calcCurTxt').textContent = next;
+    setCalcCur(calcCur() === 'Bs' ? '$' : 'Bs');
     setActive(active);
   });
 
   press($('cur'), function(){
-    var next = (curr() === 'Bs') ? '$' : 'Bs';
-    $('cur').dataset.cur = next;
-    $('curTxt').textContent = next;
-    $('payLabel').textContent = 'Pagando en ' + next;
-    if(active) setActive(active); else setActive(null);
+    setCur(curr() === 'Bs' ? '$' : 'Bs');
+    setActive(active);
     afterEdit();
   });
 
@@ -741,9 +756,19 @@
       var k = b.dataset.rate, v = rate(k);
       if(!ok(v)){ toast('Sin tasa de ' + LABEL[k]); return; }
       var el = target();
+      if(el.id !== 'expr') return;                     // arriba no aplica
       var caret = (el.selectionStart === null) ? el.value.length : el.selectionStart;
       var before = el.value.slice(0, caret);
-      insert((/[0-9.,)]\s*$/.test(before) ? '*' : '') + plain(v, decFor(el)));
+      /* si vienes de un número, la tasa CONVIERTE: en $ multiplica (da Bs),
+         en Bs divide (da $), y la unidad del cálculo cambia sola */
+      if(/[0-9.,)]\s*$/.test(before)){
+        var toBs = (calcCur() === '$');
+        insert((toBs ? '*' : '/') + plain(v, decFor(el)));
+        setCalcCur(toBs ? 'Bs' : '$');
+        setActive(el);
+      } else {
+        insert(plain(v, decFor(el)));                  // ya pusiste tú el signo
+      }
     });
   });
   document.querySelectorAll('.key[data-ins]').forEach(function(b){
@@ -756,13 +781,22 @@
   press($('toPrice'), function(){
     var v = num($('expr').value);
     if(!ok(v)){ toast('Nada que enviar'); return; }
-    $('price').value = plain(v, '.');
-    afterEdit();
-    toast('Precio: ' + fmt(v));
+    if(calcCur() === '$'){
+      $('price').value = plain(v, '.');
+      afterEdit();
+      toast('Precio: $ ' + fmt(v));
+    } else {
+      /* el precio de lista es en dólares: unos bolívares van al otro campo */
+      setCur('Bs');
+      $('pay').value = plain(v, ',');
+      afterEdit();
+      toast('Eso es Bs: va a Pagando en Bs');
+    }
   });
   press($('toPay'), function(){
     var v = num($('expr').value);
     if(!ok(v)){ toast('Nada que enviar'); return; }
+    setCur(calcCur());
     $('pay').value = plain(v, decFor($('pay')));
     afterEdit();
     toast('Pagando en ' + curr() + ': ' + fmt(v));

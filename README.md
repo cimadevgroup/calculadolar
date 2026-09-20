@@ -49,11 +49,18 @@ escribe siempre con el teclado de la app.
 - **Cualquier campo acepta una operación completa**, no solo un número: `20*3` en el
   precio vale 60, y `=` la resuelve ahí mismo. Coma decimal, paréntesis y precedencia;
   el evaluador es propio, sin `eval`.
-- Los botones de tasa (**a $ BCV**, **a $ Paralelo**, **a $ Binance**, **a € BCV**)
-  meten la tasa en el campo activo; si venías de un número, ponen el `×` solo, y si
-  venías de `÷` no lo ponen. Así `19000 ÷ a $ BCV` da los dólares de una.
-- **↑ Usar como precio $** y **↑ Usar como precio Bs** mandan el cálculo libre a las
-  casillas de arriba.
+- La calculadora tiene **su propia unidad** (botón `Bs`/`$` a la izquierda de su
+  renglón) y los botones de tasa **convierten** según ella: en `$` multiplican
+  (`10 × 848,55` = bolívares) y en `Bs` dividen (`10 ÷ 848,55` = dólares). La unidad
+  cambia sola al convertir, y con ella la tecla decimal. Si el signo lo pusiste tú,
+  solo meten el número y no tocan nada.
+- **Escribiendo en un campo de arriba** solo quedan vivos los números, el `AC`, la
+  tecla decimal y el `⌫`. Los signos, los paréntesis, el `=` y las tasas se apagan,
+  porque ahí no aplican.
+- **↑ Al precio en $** y **↑ A pagando en Bs/$** suben el cálculo a las casillas de
+  arriba. El de la derecha adopta la unidad de la calculadora. El de la izquierda, si
+  la calculadora está en bolívares, no ensucia el precio de lista (que es en dólares):
+  manda el monto al campo de la derecha en Bs.
 
 ## Guardar el resultado
 
