@@ -47,7 +47,10 @@
   /* ---- foco: lo que escribes se ilumina, lo demás se apaga ---- */
   .blk{transition:opacity .18s ease}
   .blk.dim{opacity:.28}
-  .lit-ring{box-shadow:0 0 0 2px var(--glow), 0 0 16px rgba(255,159,10,.35); border-color:var(--glow) !important}
+  .lit-ring{
+    border-color:rgba(255,196,102,.7) !important;
+    box-shadow:0 0 0 1px rgba(255,196,102,.6), 0 0 14px rgba(255,176,60,.55), 0 0 34px rgba(255,159,10,.28);
+  }
 
   /* ---- tasas ---- */
   .rates{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px}
@@ -109,9 +112,18 @@
 
   /* ---- teclado ---- */
   .pad{background:var(--card2); border:1px solid var(--line); border-radius:18px; padding:9px; transition:box-shadow .18s ease}
-  .disp{display:flex; align-items:flex-end; gap:8px; border-bottom:1px solid var(--line); padding-bottom:5px}
-  .disp .who{font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.4px; color:var(--glow); white-space:nowrap; padding-bottom:4px}
-  .disp .who.idle{color:var(--dim2)}
+  .disp{display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--line); padding-bottom:5px; transition:opacity .18s ease}
+  .disp.off{opacity:.4}
+  .unit-btn{
+    flex:0 0 auto; background:#3a3a3c; color:#fff; border:1px solid var(--line); border-radius:9px;
+    padding:4px 9px; font-size:13px; font-weight:800; cursor:pointer; line-height:1.15; text-align:center;
+  }
+  .unit-btn small{display:block; font-size:7px; font-weight:700; color:var(--dim); letter-spacing:.3px}
+  .unit-btn:active{background:#4a4a4e}
+  .resline{display:flex; align-items:flex-end; gap:8px}
+  .resline .who{font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.4px; color:var(--glow); white-space:nowrap; padding-bottom:9px}
+  .resline .who.idle{color:var(--dim2)}
+  .keyzone{border:1px solid transparent; border-radius:15px; padding:6px 5px 5px; margin:0 -5px -5px; transition:box-shadow .18s ease}
   .expr{
     flex:1; min-width:0; background:transparent; border:none; color:#fff; font-size:15px;
     padding:2px 2px 4px; outline:none; text-align:right; caret-color:var(--glow);
@@ -119,7 +131,7 @@
   }
   .expr::placeholder{font-family:-apple-system,sans-serif; font-size:11px; color:var(--dim2)}
   .expr.off{opacity:.4}
-  .res{min-height:40px; display:flex; align-items:center; justify-content:flex-end; padding:2px 4px; font-size:32px; font-weight:300; font-variant-numeric:tabular-nums; overflow:hidden}
+  .res{flex:1; min-width:0; min-height:40px; display:flex; align-items:center; justify-content:flex-end; padding:2px 4px; font-size:32px; font-weight:300; font-variant-numeric:tabular-nums; overflow:hidden}
   .res.err{color:var(--dim2); font-size:15px}
   .sendto{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-bottom:7px}
   .sendto button{border:1px solid var(--line); background:#2c2c2e; color:var(--dim); border-radius:9px; padding:6px 2px; font-size:10px; font-weight:700; cursor:pointer}
@@ -216,13 +228,19 @@
   </section>
 
   <section class="pad" id="pad">
-    <div class="disp">
-      <div class="who idle" id="resFor">Cálculo libre</div>
+    <div class="disp" id="disp">
+      <button class="unit-btn" id="calcCur" type="button" data-cur="Bs" aria-label="Unidad del cálculo">
+        <span id="calcCurTxt">Bs</span><small>unidad</small>
+      </button>
       <input class="expr" id="expr" type="text" inputmode="none" autocomplete="off" autocorrect="off"
-             spellcheck="false" placeholder="Usa las teclas de abajo">
+             spellcheck="false" placeholder="0">
     </div>
-    <div class="res" id="res">0</div>
+    <div class="resline">
+      <div class="who idle" id="resFor">Cálculo libre</div>
+      <div class="res" id="res">0</div>
+    </div>
 
+    <div class="keyzone" id="keyzone">
     <div class="sendto">
       <button id="toPrice" type="button">↑ Usar como precio $</button>
       <button id="toPay" type="button">↑ Usar como precio Bs</button>
@@ -261,6 +279,7 @@
       <button class="key fn" id="kDel" type="button">⌫</button>
       <button class="key op" id="kEq" type="button">=</button>
     </div>
+    </div>
   </section>
 </div>
 
@@ -284,6 +303,7 @@
   var active = null;
   var $ = function(id){ return document.getElementById(id); };
   function curr(){ return $('cur').dataset.cur; }
+  function calcCur(){ return $('calcCur').dataset.cur; }
 
   /* ---------- números ---------- */
   function ok(n){ return typeof n === 'number' && isFinite(n); }
@@ -378,6 +398,7 @@
   function decFor(el){
     if(el && el.id === 'price') return '.';
     if(el && el.id === 'pay') return (curr() === '$') ? '.' : ',';
+    if(!el || el.id === 'expr') return (calcCur() === '$') ? '.' : ',';
     return ',';
   }
   function target(){ return active || $('expr'); }
@@ -392,8 +413,13 @@
     KEYS.forEach(function(k){
       $('wrap-' + k).classList.toggle('lit-ring', !!active && active.id === k);
     });
-    $('pad').classList.toggle('lit-ring', !!active);
-    $('expr').classList.toggle('off', !!active && active.id !== 'expr');
+    /* si escribes arriba, solo se encienden las teclas; el campo de la
+       calculadora se queda apagado para que no parezca que hay dos activos */
+    var onCalc = !!active && active.id === 'expr';
+    $('pad').classList.toggle('lit-ring', onCalc);
+    $('keyzone').classList.toggle('lit-ring', !!active && !onCalc);
+    $('disp').classList.toggle('off', !!active && !onCalc);
+    $('expr').classList.toggle('off', false);
     var who = $('resFor');
     who.textContent = fieldName(active);
     who.classList.toggle('idle', !active);
@@ -694,6 +720,13 @@
     if(active){ active.blur(); setActive(null); }
   }, true);
 
+  press($('calcCur'), function(){
+    var next = (calcCur() === 'Bs') ? '$' : 'Bs';
+    $('calcCur').dataset.cur = next;
+    $('calcCurTxt').textContent = next;
+    setActive(active);
+  });
+
   press($('cur'), function(){
     var next = (curr() === 'Bs') ? '$' : 'Bs';
     $('cur').dataset.cur = next;
@@ -754,7 +787,7 @@
       L.push($('impExtra').innerText.replace(/\s+/g, ' ').trim());
     }
     var ex = $('expr').value.trim(), exv = num(ex);
-    if(ex && ok(exv)) L.push('Cálculo: ' + ex + ' = ' + fmt(exv));
+    if(ex && ok(exv)) L.push('Cálculo: ' + ex + ' = ' + calcCur() + ' ' + fmt(exv));
     var text = L.join('\n');
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(text).then(function(){ toast('Copiado'); }, function(){ toast('No se pudo copiar'); });
@@ -831,28 +864,50 @@
     });
     y += 8; rule(); y += 44;
 
+    var R = {bcv:rate('bcv'), par:rate('par'), bin:rate('bin'), eur:rate('eur')};
     var list = num($('price').value), desc = num($('disc').value), pay = num($('pay').value);
     if(!ok(desc) || desc < 0) desc = 0;
     var net = ok(list) ? list * (1 - desc / 100) : NaN;
-    var hasBuy = (ok(list) && list > 0) || (ok(pay) && pay > 0);
+    var hasP = ok(net) && net > 0, hasQ = ok(pay) && pay > 0;
 
-    if(hasBuy){
-      put('LA COMPRA', PAD, 20, '800', COL.dim); y += 40;
-      if(ok(list) && list > 0){
-        put('Precio', PAD, 27, '600', COL.dim);
-        put('$ ' + fmt(list), W - PAD, 27, '700', '#fff', 'right');
-        y += 38;
-      }
-      if(desc > 0){
-        put('Descuento', PAD, 27, '600', COL.dim);
-        put('−' + fmt(desc, 1) + ' %   →   $ ' + fmt(net), W - PAD, 27, '700', COL.warn, 'right');
-        y += 38;
-      }
-      if(ok(pay) && pay > 0){
-        put('Pagando en ' + curr(), PAD, 27, '600', COL.dim);
-        put(curr() + ' ' + fmt(pay), W - PAD, 27, '700', '#fff', 'right');
-        y += 38;
-      }
+    function row(left, right, color, size){
+      put(left, PAD, size || 27, '600', COL.dim);
+      put(right, W - PAD, size || 27, '700', color || '#fff', 'right');
+      y += 36;
+    }
+    function sub(t){ put(t, PAD + 16, 22, '400', COL.dim2); y += 32; }
+
+    if(hasP && hasQ && ok(R.bcv)){
+      /* los dos precios, frente a frente */
+      put('LOS DOS PRECIOS', PAD, 20, '800', COL.dim); y += 40;
+      row('Precio en $', '$ ' + fmt(net) + (desc > 0 ? '   (−' + fmt(desc, 1) + '%)' : ''), '#fff');
+      sub('= Bs ' + fmt(net * R.bcv) + ' a tasa BCV');
+      row('Pagando en ' + curr(), curr() + ' ' + fmt(pay), '#fff');
+      var costBs = (curr() === 'Bs') ? pay : pay * R.bcv;
+      sub('= $ ' + fmt(costBs / R.bcv) + ' a tasa BCV');
+      var listaBs = net * R.bcv, diff = costBs - listaBs;
+      y += 4;
+      row(Math.abs(diff) < 0.01 ? 'Sale igual' : (diff > 0 ? 'Pagas de más' : 'Pagas de menos'),
+          'Bs ' + fmt(Math.abs(diff)) + '   ' + pct(diff / listaBs * 100),
+          diff > 0.01 ? COL.bcv : COL.par);
+      y += 8; rule(); y += 44;
+    } else if(hasP){
+      put('EL PRECIO', PAD, 20, '800', COL.dim); y += 40;
+      row('En dólares', '$ ' + fmt(net) + (desc > 0 ? '   (−' + fmt(desc, 1) + '%)' : ''), '#fff');
+      y += 4;
+      KEYS.forEach(function(k){
+        if(!ok(R[k]) || R[k] <= 0) return;
+        row('a ' + LABEL[k], 'Bs ' + fmt(net * R[k]), COL[k], 25);
+      });
+      y += 8; rule(); y += 44;
+    } else if(hasQ){
+      put('EL MONTO', PAD, 20, '800', COL.dim); y += 40;
+      row('Pagando en ' + curr(), curr() + ' ' + fmt(pay), '#fff');
+      y += 4;
+      KEYS.forEach(function(k){
+        if(!ok(R[k]) || R[k] <= 0) return;
+        row('a ' + LABEL[k], (curr() === 'Bs') ? '$ ' + fmt(pay / R[k]) : 'Bs ' + fmt(pay * R[k]), COL[k], 25);
+      });
       y += 8; rule(); y += 44;
     }
 
@@ -873,6 +928,13 @@
         if(t) wrap(t, 23, COL.dim, 32);
       });
       y += 12; rule(); y += 34;
+    }
+
+    var ex = $('expr').value.trim(), exv = num(ex);
+    if(ex && ok(exv) && /[+\-*/]/.test(ex)){
+      put('EL CÁLCULO', PAD, 20, '800', COL.dim); y += 38;
+      wrap(ex.replace(/\*/g, ' × ').replace(/\//g, ' ÷ ') + '  =  ' + calcCur() + ' ' + fmt(exv), 26, '#fff', 36);
+      y += 10; rule(); y += 34;
     }
 
     put('cimadevgroup.github.io/calculadolar', PAD, 19, '600', COL.dim2);
