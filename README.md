@@ -17,7 +17,7 @@ teléfono y se puede instalar como app (PWA).
 Lo del euro: aquí nadie paga en euros. Pero la tasa del euro del BCV está ~15 % por
 encima de la del dólar, así que hay quien la cobra como si fuera "la tasa oficial".
 Por eso está en la lista: para poder cacharlo. Si el cobro cae en esa tasa, la app lo
-marca con bandera roja y dice cuánto es el sobreprecio real.
+marca con bandera y dice cuánto es el sobreprecio real.
 
 Cualquiera de las cuatro se puede escribir a mano si el comercio usa otra: queda
 marcada con ✎ y todos los cálculos la usan. El botón de refrescar borra los valores
@@ -27,7 +27,8 @@ manuales y vuelve a las del día.
 
 - **Precio en $ + descuento %** → cuántos bolívares son con cada una de las cuatro
   tasas, y el neto en dólares si hay descuento.
-- **Te cobran** (Bs o $) → a cuánto equivale con cada tasa.
+- **Pagando en Bs / en $** (el botón de la izquierda del campo alterna la unidad) →
+  a cuánto equivale con cada tasa.
 - **Tasa implícita**: con las dos casillas llenas dice a qué tasa te están cobrando de
   verdad, y la nombra si coincide (±1 %) con alguna conocida:
   *a tasa BCV* · *a tasa Binance* · *a paralelo* · *🚩 a tasa EURO* ·
@@ -35,16 +36,41 @@ manuales y vuelve a las del día.
 - **El descuento de mentira**: si te ofrecen 10 % pero cobran a una tasa inflada, la
   app compara contra pagar el precio de lista a tasa BCV y dice el descuento real —
   o cuánto estás pagando de más, que suele ser el caso.
-- El botón de copiar arma un resumen de texto (tasas, precio, cobro y veredicto) para
-  pegarlo en WhatsApp.
 
-## La calculadora
+## Un solo teclado
 
-Tiene teclado completo, y además el campo de arriba se puede escribir con el teclado
-numérico del teléfono. Las cuatro tasas son botones: al tocar una, si venías de un
-número mete el `×` solo (`78` + Binance → `78*950,96`). Coma decimal, paréntesis y
-precedencia; el evaluador es propio, sin `eval`. Los botones **↑ Usar como precio $**
-y **↑ Usar como te cobran** mandan el resultado a las casillas de arriba.
+El teclado del teléfono no sale nunca (`inputmode="none"` en todos los campos): se
+escribe siempre con el teclado de la app.
+
+- Al tocar un campo, **ese campo y el teclado se encienden** con el mismo halo naranja
+  y el resto de la pantalla se apaga. El display dice en cuál estás escribiendo.
+- La **tecla decimal alterna**: punto cuando metes dólares, coma cuando metes
+  bolívares, tasas o porcentajes.
+- **Cualquier campo acepta una operación completa**, no solo un número: `20*3` en el
+  precio vale 60, y `=` la resuelve ahí mismo. Coma decimal, paréntesis y precedencia;
+  el evaluador es propio, sin `eval`.
+- Los botones de tasa (**a $ BCV**, **a $ Paralelo**, **a $ Binance**, **a € BCV**)
+  meten la tasa en el campo activo; si venías de un número, ponen el `×` solo, y si
+  venías de `÷` no lo ponen. Así `19000 ÷ a $ BCV` da los dólares de una.
+- **↑ Usar como precio $** y **↑ Usar como precio Bs** mandan el cálculo libre a las
+  casillas de arriba.
+
+## Guardar el resultado
+
+- 📋 **Copiar**: manda el resumen completo en texto al portapapeles, para pegar en
+  WhatsApp.
+- 🖼 **Recibo**: arma un PNG con las tasas del día, la compra y el veredicto, y abre la
+  hoja de compartir del teléfono — ahí «Guardar imagen» lo manda a Fotos. Ninguna web
+  puede escribir sola en el carrete, siempre pasa por la hoja de compartir; si el
+  navegador no la soporta, el recibo se descarga.
+
+## Ajustada como app
+
+Sin zoom, sin pinch, sin doble-toque, sin tirar-para-recargar, sin rebote y sin
+selección de texto fuera de los campos. Instalada en el teléfono no hay barra de
+navegador, y el gesto de atrás pide confirmación en vez de botar la sesión de una.
+En pestaña de navegador, el gesto de atrás desde el borde lo maneja el sistema
+operativo y ninguna página lo puede bloquear: para eso hay que instalarla.
 
 ## Sin señal
 
