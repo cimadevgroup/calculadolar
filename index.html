@@ -335,6 +335,13 @@
     d = (d === undefined) ? 2 : d;
     return n.toLocaleString('es-VE', {minimumFractionDigits:d, maximumFractionDigits:d});
   }
+  /* el dólar escribe 3,000.00 y el bolívar 3.000,00 */
+  function fmtU(n, unit, d){
+    if(!ok(n)) return '—';
+    d = (d === undefined) ? 2 : d;
+    return n.toLocaleString(unit === '$' ? 'en-US' : 'es-VE',
+      {minimumFractionDigits:d, maximumFractionDigits:d});
+  }
   function pct(n){
     if(!ok(n)) return '—';
     if(Math.abs(n) < 0.05) return '0 %';
@@ -637,9 +644,9 @@
       var v = evaluate(raw);
       if(!ok(v)) throw new Error('∞');
       box.className = 'res';
-      var txt = fmt(v, (Math.abs(v % 1) > 1e-9) ? 2 : 0);
-      if(el.id === 'expr') box.innerHTML = '<u>' + calcCur() + '</u>' + txt;
-      else box.textContent = txt;
+      var dec = (Math.abs(v % 1) > 1e-9) ? 2 : 0;
+      if(el.id === 'expr') box.innerHTML = '<u>' + calcCur() + '</u>' + fmtU(v, calcCur(), dec);
+      else box.textContent = fmt(v, dec);
       box.dataset.value = v;
     }catch(e){
       box.className = 'res err';
@@ -784,7 +791,7 @@
     if(calcCur() === '$'){
       $('price').value = plain(v, '.');
       afterEdit();
-      toast('Precio: $ ' + fmt(v));
+      toast('Precio: $ ' + fmtU(v, '$'));
     } else {
       /* el precio de lista es en dólares: unos bolívares van al otro campo */
       setCur('Bs');
@@ -799,7 +806,7 @@
     setCur(calcCur());
     $('pay').value = plain(v, decFor($('pay')));
     afterEdit();
-    toast('Pagando en ' + curr() + ': ' + fmt(v));
+    toast('Pagando en ' + curr() + ': ' + fmtU(v, curr()));
   });
 
   $('btnRefresh').addEventListener('click', fetchRates);
@@ -821,7 +828,7 @@
       L.push($('impExtra').innerText.replace(/\s+/g, ' ').trim());
     }
     var ex = $('expr').value.trim(), exv = num(ex);
-    if(ex && ok(exv)) L.push('Cálculo: ' + ex + ' = ' + calcCur() + ' ' + fmt(exv));
+    if(ex && ok(exv)) L.push('Cálculo: ' + ex + ' = ' + calcCur() + ' ' + fmtU(exv, calcCur()));
     var text = L.join('\n');
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(text).then(function(){ toast('Copiado'); }, function(){ toast('No se pudo copiar'); });
@@ -967,7 +974,7 @@
     var ex = $('expr').value.trim(), exv = num(ex);
     if(ex && ok(exv) && /[+\-*/]/.test(ex)){
       put('EL CÁLCULO', PAD, 20, '800', COL.dim); y += 38;
-      wrap(ex.replace(/\*/g, ' × ').replace(/\//g, ' ÷ ') + '  =  ' + calcCur() + ' ' + fmt(exv), 26, '#fff', 36);
+      wrap(ex.replace(/\*/g, ' × ').replace(/\//g, ' ÷ ') + '  =  ' + calcCur() + ' ' + fmtU(exv, calcCur()), 26, '#fff', 36);
       y += 10; rule(); y += 34;
     }
 
