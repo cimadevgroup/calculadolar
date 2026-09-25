@@ -5,85 +5,82 @@ teléfono y se puede instalar como app (PWA).
 
 **👉 https://cimadevgroup.github.io/calculadolar/**
 
-## Las cuatro tasas
+## Las ocho tasas
 
-| tasa | de dónde sale | para qué |
-| --- | --- | --- |
-| **BCV** | [ve.dolarapi.com](https://ve.dolarapi.com) | la oficial, la vara de medir |
-| **Paralelo** | ve.dolarapi.com | la de la calle |
-| **Binance** | [criptoya.com](https://criptoya.com) (P2P USDT/VES, promedio compra-venta) | la que usa medio comercio hoy |
-| **Euro BCV** | ve.dolarapi.com | **la trampa** |
+| tasa | de dónde sale |
+| --- | --- |
+| **BCV** | [ve.dolarapi.com](https://ve.dolarapi.com) |
+| **Paralelo** | ve.dolarapi.com |
+| **Binance P2P** | [criptoya.com](https://criptoya.com) (USDT/VES, promedio compra-venta) |
+| **Bybit P2P** | criptoya.com |
+| **Euro BCV** | ve.dolarapi.com — **la trampa** |
+| **Zelle ✎** | a mano: no hay API pública que la publique |
+| **PayPal ✎** | a mano: igual que Zelle |
+| **Promedio** | calculado: promedio de las tasas de mercado cargadas (paralelo, Binance, Bybit, Zelle y PayPal) |
 
-Lo del euro: aquí nadie paga en euros. Pero la tasa del euro del BCV está ~15 % por
+Lo del euro: aquí nadie paga en euros, pero la tasa del euro del BCV está ~15 % por
 encima de la del dólar, así que hay quien la cobra como si fuera "la tasa oficial".
-Por eso está en la lista: para poder cacharlo. Si el cobro cae en esa tasa, la app lo
-marca con bandera y dice cuánto es el sobreprecio real.
+Si el cobro cae en esa tasa, la app lo marca con bandera.
 
-Cualquiera de las cuatro se puede escribir a mano si el comercio usa otra: queda
-marcada con ✎ y todos los cálculos la usan. El botón de refrescar borra los valores
-manuales y vuelve a las del día.
+Zelle y PayPal quedan guardadas en el teléfono y el botón de refrescar **no las borra**
+(no tienen fuente automática). Las otras cinco bajan solas y se pueden pisar a mano:
+quedan con ✎ hasta que refresques.
 
-## Qué calcula
+## Los dos precios
 
-- **Precio en $ + descuento %** → cuántos bolívares son con cada una de las cuatro
-  tasas, y el neto en dólares si hay descuento.
-- **Pagando en Bs / en $** (el botón de la izquierda del campo alterna la unidad) →
-  a cuánto equivale con cada tasa.
-- **Tasa implícita**: con las dos casillas llenas dice a qué tasa te están cobrando de
-  verdad, y la nombra si coincide (±1 %) con alguna conocida:
-  *a tasa BCV* · *a tasa Binance* · *a paralelo* · *🚩 a tasa EURO* ·
-  *mejor que el BCV* · *tasa mixta / inflada* · *por encima de todas*.
-- **El descuento de mentira**: si te ofrecen 10 % pero cobran a una tasa inflada, la
-  app compara contra pagar el precio de lista a tasa BCV y dice el descuento real —
-  o cuánto estás pagando de más, que suele ser el caso.
+En una tienda te dan dos precios por lo mismo:
+
+- **Precio pagando en $** — lo que cuesta si pagas en efectivo verde.
+- **Precio pagando en Bs** — lo que cuesta si pagas en bolívares. Ese precio te lo
+  pueden decir en bolívares («son 9.412») o en dólares («pagando en Bs te sale en 11»),
+  y por eso el botón dice **mostrar en Bs / mostrar en $**: es el mismo precio visto en
+  una u otra moneda, convertido al BCV, que es como lo cotizan. El precio no cambia al
+  tocarlo, solo cómo lo lees.
+
+Con los dos llenos la app calcula:
+
+- **Tasa implícita**: a qué tasa te están cobrando de verdad, y la nombra si coincide
+  (±1 %) con alguna conocida — *a tasa BCV*, *a paralelo*, *a tasa Binance*,
+  *🚩 a tasa EURO*, *por encima de todas*…
+- **Cómo te conviene pagar**: la conclusión, que es para lo que existe esta app.
+  Compara los dos precios midiendo tu dólar a la mejor tasa de mercado que tengas
+  cargada (la más alta entre paralelo, Binance, Bybit, Zelle y PayPal) y dice
+  **paga en Bs** o **paga en $**, con cuánto te ahorras y de dónde sale la cuenta.
+- **El descuento de mentira**: si te ofrecen 10 % pero cobran a una tasa inflada,
+  compara contra pagar el precio de lista a tasa BCV y dice el descuento real.
 
 ## Un solo teclado
 
-El teclado del teléfono no sale nunca (`inputmode="none"` en todos los campos): se
-escribe siempre con el teclado de la app.
+El teclado del teléfono no sale nunca (`inputmode="none"`): se escribe siempre con el
+teclado de la app.
 
-- Al tocar un campo, **ese campo y el teclado se encienden** con el mismo halo naranja
-  y el resto de la pantalla se apaga. El display dice en cuál estás escribiendo.
-- La **tecla decimal alterna**: punto cuando metes dólares, coma cuando metes
-  bolívares, tasas o porcentajes.
-- **Cualquier campo acepta una operación completa**, no solo un número: `20*3` en el
-  precio vale 60, y `=` la resuelve ahí mismo. Coma decimal, paréntesis y precedencia;
-  el evaluador es propio, sin `eval`.
-- La calculadora tiene **su propia unidad** (botón `Bs`/`$` a la izquierda de su
-  renglón) y los botones de tasa **convierten** según ella: en `$` multiplican
-  (`10 × 848,55` = bolívares) y en `Bs` dividen (`10 ÷ 848,55` = dólares). La unidad
-  cambia sola al convertir, y con ella la tecla decimal. Si el signo lo pusiste tú,
-  solo meten el número y no tocan nada.
-- **Escribiendo en un campo de arriba** solo quedan vivos los números, el `AC`, la
-  tecla decimal y el `⌫`. Los signos, los paréntesis, el `=` y las tasas se apagan,
-  porque ahí no aplican.
-- **↑ Al precio en $** y **↑ A pagando en Bs/$** suben el cálculo a las casillas de
-  arriba. El de la derecha adopta la unidad de la calculadora. El de la izquierda, si
-  la calculadora está en bolívares, no ensucia el precio de lista (que es en dólares):
-  manda el monto al campo de la derecha en Bs.
+- Al tocar un campo, **ese campo y el teclado se encienden** con el mismo halo y el
+  resto se apaga. El display dice en cuál estás escribiendo.
+- La **tecla decimal alterna**: punto para dólares, coma para bolívares.
+- **Escribiendo en un campo de arriba** solo quedan vivos números, `AC`, decimal y `⌫`;
+  signos, paréntesis y tasas se apagan porque ahí no aplican.
+- La calculadora tiene **su propia unidad** y los botones de tasa **convierten** según
+  ella: en `$` multiplican (dan Bs) y en `Bs` dividen (dan $), cambiando la unidad sola.
+- **↑ Al precio en $** y **↑ A pagando en Bs/$** suben el cálculo a las casillas.
 
 ## Guardar el resultado
 
-- 📋 **Copiar**: manda el resumen completo en texto al portapapeles, para pegar en
-  WhatsApp.
-- 🖼 **Recibo**: arma un PNG con las tasas del día, la compra y el veredicto, y abre la
-  hoja de compartir del teléfono — ahí «Guardar imagen» lo manda a Fotos. Ninguna web
-  puede escribir sola en el carrete, siempre pasa por la hoja de compartir; si el
-  navegador no la soporta, el recibo se descarga.
+- 📋 **Copiar**: el resumen completo en texto, para pegar en WhatsApp.
+- 🖼 **Recibo**: un PNG con las tasas del día, los dos precios, el veredicto y la
+  recomendación, que sale por la hoja de compartir del teléfono («Guardar imagen» lo
+  manda a Fotos). Ninguna web puede escribir sola en el carrete.
 
 ## Ajustada como app
 
 Sin zoom, sin pinch, sin doble-toque, sin tirar-para-recargar, sin rebote y sin
-selección de texto fuera de los campos. Instalada en el teléfono no hay barra de
-navegador, y el gesto de atrás pide confirmación en vez de botar la sesión de una.
-En pestaña de navegador, el gesto de atrás desde el borde lo maneja el sistema
-operativo y ninguna página lo puede bloquear: para eso hay que instalarla.
+selección de texto fuera de los campos. Nada se desborda de su recuadro aunque las
+tasas pasen de mil. Instalada no hay barra de navegador y el gesto de atrás pide
+confirmación; en pestaña normal ese gesto lo maneja el sistema operativo.
 
 ## Sin señal
 
-El `sw.js` guarda la página para que abra sin internet, y la última consulta de tasas
-queda en `localStorage`: al abrir sin datos muestra esas y avisa
-«Sin conexión · guardadas ‹fecha›».
+El `sw.js` guarda la página y la última consulta de tasas queda en `localStorage`: al
+abrir sin datos muestra esas y avisa «Sin conexión · guardadas ‹fecha›».
 
 ## Archivos
 
@@ -95,8 +92,5 @@ Todo estático, sin build ni dependencias:
 | `sw.js` | service worker, cachea el cascarón |
 | `manifest.webmanifest` | datos de instalación de la PWA |
 | `icon*.png`, `icon.svg` | iconos |
-
-Para correrlo local basta cualquier servidor estático, por ejemplo
-`python3 -m http.server 8791` dentro de la carpeta.
 
 Las tasas son **referenciales**.

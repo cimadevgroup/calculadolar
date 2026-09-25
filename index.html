@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Calculadolar</title>
-<meta name="description" content="Calculadora de tasas para Venezuela: BCV, paralelo, Binance y euro.">
+<meta name="description" content="Calculadora de tasas para Venezuela: BCV, paralelo, Binance, Bybit y euro.">
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,34 +17,33 @@
   :root{
     --bg:#000; --card:#141416; --card2:#1c1c1e; --field:#2c2c2e;
     --line:#2e2e32; --txt:#fff; --dim:#8e8e93; --dim2:#636366;
-    --bcv:#ff453a; --par:#30d158; --bin:#ffd60a; --eur:#0a84ff;
-    --op:#ff9f0a; --warn:#ffd60a; --glow:#ff9f0a;
+    --bcv:#ff453a; --par:#30d158; --bin:#ffd60a; --byb:#5ac8fa;
+    --eur:#0a84ff; --zel:#bf5af2; --ppl:#7d8cff; --prom:#c7c7cc;
+    --op:#ff9f0a; --warn:#ffd60a; --glow:#ffc466;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
   html,body{
     margin:0; background:var(--bg); color:var(--txt);
-    overscroll-behavior:none;              /* sin tirar-para-recargar ni rebote */
-    touch-action:pan-y;                    /* sin pinch ni doble-toque para hacer zoom */
+    overscroll-behavior:none; touch-action:pan-y;
     -webkit-text-size-adjust:100%; text-size-adjust:100%;
   }
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     padding:max(8px,env(safe-area-inset-top)) 10px calc(14px + env(safe-area-inset-bottom));
-    -webkit-user-select:none; user-select:none;      /* nada se selecciona… */
-    -webkit-touch-callout:none;                       /* …ni saca lupa ni menú */
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+    overflow-x:hidden;
   }
-  input{-webkit-user-select:text; user-select:text}   /* …salvo los campos */
-  .app{max-width:480px; margin:0 auto; display:flex; flex-direction:column; gap:9px}
+  input{-webkit-user-select:text; user-select:text}
+  .app{max-width:480px; margin:0 auto; display:flex; flex-direction:column; gap:8px}
 
   header{display:flex; align-items:center; gap:8px}
-  h1{font-size:21px; font-weight:800; color:var(--bcv); margin:0; letter-spacing:-.4px}
-  .ts{font-size:9.5px; color:var(--dim2); font-variant-numeric:tabular-nums; margin-left:auto; text-align:right; line-height:1.35}
+  h1{font-size:20px; font-weight:800; color:var(--bcv); margin:0; letter-spacing:-.4px}
+  .ts{font-size:9px; color:var(--dim2); font-variant-numeric:tabular-nums; margin-left:auto; text-align:right; line-height:1.35}
   .icon-btn{width:32px; height:32px; flex:0 0 auto; border:none; border-radius:50%; background:var(--card2); color:var(--dim); display:grid; place-items:center; cursor:pointer}
   .icon-btn:active{background:#3a3a3c; color:#fff}
   .icon-btn.spin svg{animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* ---- foco: lo que escribes se ilumina, lo demás se apaga ---- */
   .blk{transition:opacity .18s ease}
   .blk.dim{opacity:.28}
   .lit-ring{
@@ -52,54 +51,76 @@
     box-shadow:0 0 0 1px rgba(255,196,102,.6), 0 0 14px rgba(255,176,60,.55), 0 0 34px rgba(255,159,10,.28);
   }
 
-  /* ---- tasas ---- */
+  /* ---- tasas: 2 filas de 4, nada se desborda ---- */
   .rates{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px}
-  .rate{background:var(--card); border:1px solid var(--line); border-radius:11px; padding:4px 2px 5px; text-align:center; position:relative}
-  .rate label{display:block; font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:.2px; line-height:1.15; margin-bottom:1px}
-  .rate input{width:100%; min-width:0; background:transparent; border:none; outline:none; padding:0; font-size:14px; font-weight:700; text-align:center; font-variant-numeric:tabular-nums; caret-color:var(--glow)}
+  .rate{
+    background:var(--card); border:1px solid var(--line); border-radius:11px;
+    padding:4px 2px 5px; text-align:center; position:relative; overflow:hidden; min-width:0;
+  }
+  .rate label{display:block; font-size:7.5px; font-weight:800; text-transform:uppercase; letter-spacing:.2px; line-height:1.15; margin-bottom:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .rate input{
+    width:100%; min-width:0; background:transparent; border:none; outline:none; padding:0;
+    font-size:13px; font-weight:700; text-align:center; font-variant-numeric:tabular-nums;
+    letter-spacing:-.3px; caret-color:var(--glow);
+  }
   .rate.is-edited{border-style:dashed}
-  .rate.is-edited::after{content:"✎"; position:absolute; top:2px; right:4px; font-size:8px; color:var(--dim)}
+  .rate.is-edited::after{content:"✎"; position:absolute; top:1px; right:3px; font-size:7px; color:var(--dim)}
   .r-bcv label,.r-bcv input{color:var(--bcv)} .r-bcv input::placeholder{color:#ff453a66}
   .r-par label,.r-par input{color:var(--par)} .r-par input::placeholder{color:#30d15866}
   .r-bin label,.r-bin input{color:var(--bin)} .r-bin input::placeholder{color:#ffd60a66}
+  .r-byb label,.r-byb input{color:var(--byb)} .r-byb input::placeholder{color:#5ac8fa66}
   .r-eur label,.r-eur input{color:var(--eur)} .r-eur input::placeholder{color:#0a84ff66}
+  .r-zel label,.r-zel input{color:var(--zel)} .r-zel input::placeholder{color:#bf5af266}
+  .r-ppl label,.r-ppl input{color:var(--ppl)} .r-ppl input::placeholder{color:#7d8cff66}
+  .r-prom label,.r-prom input{color:var(--prom)} .r-prom input::placeholder{color:#c7c7cc66}
   .r-eur{border-color:#0a84ff44}
 
   /* ---- entradas ---- */
   .cols{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
-  .field-label{font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.4px; color:var(--dim); margin:0 0 4px 2px}
-  .field{display:flex; align-items:stretch; height:44px; background:var(--field); border:1px solid var(--line); border-radius:12px; overflow:hidden; transition:box-shadow .18s ease}
-  .field input{flex:1; width:100%; min-width:0; background:transparent; border:none; outline:none; color:#fff; font-size:18px; text-align:center; font-variant-numeric:tabular-nums; caret-color:var(--glow)}
+  .field-label{font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.3px; color:var(--dim); margin:0 0 4px 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .field{display:flex; align-items:stretch; height:44px; background:var(--field); border:1px solid var(--line); border-radius:12px; overflow:hidden; transition:box-shadow .18s ease; min-width:0}
+  .field input{flex:1; width:100%; min-width:0; background:transparent; border:none; outline:none; color:#fff; font-size:17px; text-align:center; font-variant-numeric:tabular-nums; letter-spacing:-.3px; caret-color:var(--glow)}
   .field .sep{width:1px; background:var(--line); margin:7px 0}
-  .field .disc{flex:0 0 42px; width:42px; font-size:15px; color:var(--warn); text-align:right; padding-right:2px}
+  .field .disc{flex:0 0 40px; width:40px; font-size:14px; color:var(--warn); text-align:right; padding-right:2px}
   .field .disc::placeholder{color:#ffd60a55}
-  .field .pct{display:flex; align-items:center; padding:0 6px 0 2px; font-size:10px; font-weight:800; color:var(--warn)}
+  .field .pct{display:flex; align-items:center; padding:0 5px 0 2px; font-size:9px; font-weight:800; color:var(--warn)}
   .cur-btn{
-    flex:0 0 46px; background:#3a3a3c; color:#fff; border:none; border-right:1px solid var(--line);
-    font-size:15px; font-weight:800; cursor:pointer; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; line-height:1; gap:1px;
+    flex:0 0 50px; background:#3a3a3c; color:#fff; border:none; border-right:1px solid var(--line);
+    cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    line-height:1.05; gap:1px; padding:0 2px;
   }
-  .cur-btn small{font-size:7px; font-weight:700; color:var(--dim); letter-spacing:.3px}
+  .cur-btn small{font-size:6.5px; font-weight:700; color:var(--dim); letter-spacing:.2px; text-transform:uppercase}
+  .cur-btn b{font-size:15px; font-weight:800}
   .cur-btn:active{background:#4a4a4e}
-  .hint{margin-top:5px; font-size:9.5px; color:var(--dim2); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; line-height:1.55; min-height:62px}
-  .hint .row{display:flex; gap:5px; align-items:baseline}
-  .hint .row span{flex:0 0 50px; opacity:.72}
-  .hint b{color:#d1d1d6; font-weight:700; white-space:nowrap}
+
+  .hint{
+    margin-top:5px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 5px;
+    font-size:9px; color:var(--dim2); font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    line-height:1.6; min-height:60px;
+  }
+  .hint .row{display:flex; gap:3px; align-items:baseline; min-width:0}
+  .hint .row span{flex:0 0 auto; opacity:.7}
+  .hint .row b{flex:1; min-width:0; font-weight:700; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .hint .row.wide{grid-column:1 / -1}
   .hint .row.net span,.hint .row.net b{color:var(--warn)}
-  .hint .row.k-bcv span,.hint .row.k-bcv b{color:var(--bcv)}
-  .hint .row.k-par span,.hint .row.k-par b{color:var(--par)}
-  .hint .row.k-bin span,.hint .row.k-bin b{color:var(--bin)}
-  .hint .row.k-eur span,.hint .row.k-eur b{color:var(--eur)}
-  .hint .empty{font-style:italic}
+  .hint .k-bcv span,.hint .k-bcv b{color:var(--bcv)}
+  .hint .k-par span,.hint .k-par b{color:var(--par)}
+  .hint .k-bin span,.hint .k-bin b{color:var(--bin)}
+  .hint .k-byb span,.hint .k-byb b{color:var(--byb)}
+  .hint .k-eur span,.hint .k-eur b{color:var(--eur)}
+  .hint .k-zel span,.hint .k-zel b{color:var(--zel)}
+  .hint .k-ppl span,.hint .k-ppl b{color:var(--ppl)}
+  .hint .k-prom span,.hint .k-prom b{color:var(--prom)}
+  .hint .empty{grid-column:1 / -1; font-style:italic}
 
   /* ---- veredicto ---- */
-  .verdict{padding:9px 12px; border-radius:16px; border:1px dashed var(--line); background:var(--card)}
-  .vtop{display:flex; align-items:center; gap:8px}
+  .verdict{padding:9px 11px; border-radius:16px; border:1px dashed var(--line); background:var(--card); overflow:hidden}
+  .vtop{display:flex; align-items:center; gap:8px; min-width:0}
   .verdict .lbl{font-size:9px; text-transform:uppercase; letter-spacing:.5px; color:var(--dim)}
-  .verdict .val{font-size:26px; font-weight:800; line-height:1.1; font-variant-numeric:tabular-nums}
+  .verdict .val{font-size:25px; font-weight:800; line-height:1.1; font-variant-numeric:tabular-nums; letter-spacing:-.5px; white-space:nowrap}
   .verdict .val small{font-size:11px; font-weight:500; color:var(--dim)}
-  .verdict .tag{font-size:9.5px; font-weight:800; text-transform:uppercase; padding:4px 8px; border-radius:7px; border:1px solid var(--line); color:var(--dim); margin-left:auto; text-align:center; max-width:46%; line-height:1.25}
-  .verdict .extra{margin-top:6px; font-size:10px; color:var(--dim2); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; line-height:1.5}
+  .verdict .tag{font-size:9px; font-weight:800; text-transform:uppercase; padding:4px 7px; border-radius:7px; border:1px solid var(--line); color:var(--dim); margin-left:auto; text-align:center; max-width:48%; line-height:1.25}
+  .verdict .extra{margin-top:6px; font-size:9.5px; color:var(--dim2); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; line-height:1.5}
   .verdict .extra b{color:#d1d1d6}
   .verdict .extra .up{color:var(--bcv)} .verdict .extra .down{color:var(--par)}
   .verdict.ok{border-style:solid; border-color:#30d15866}
@@ -110,57 +131,73 @@
   .verdict.eur{border-style:solid; border-color:#0a84ff88}
   .verdict.eur .tag{color:var(--eur); background:#0a84ff26; border-color:#0a84ff88}
 
+  /* ---- la conclusión: cómo te conviene pagar ---- */
+  .advice{display:none; margin-top:8px; border-radius:12px; padding:7px 9px; border:1px solid var(--line); background:#0d0d0f}
+  .advice.on{display:block}
+  .advice .head{display:flex; align-items:baseline; gap:6px; flex-wrap:wrap}
+  .advice .big{font-size:14px; font-weight:800; letter-spacing:-.2px}
+  .advice .save{font-size:11px; font-weight:700; font-variant-numeric:tabular-nums}
+  .advice .why{margin-top:3px; font-size:9px; color:var(--dim2); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; line-height:1.5}
+  .advice.bs{border-color:#30d15877; background:#30d1580f}
+  .advice.bs .big,.advice.bs .save{color:var(--par)}
+  .advice.usd{border-color:#ffd60a77; background:#ffd60a0f}
+  .advice.usd .big,.advice.usd .save{color:var(--warn)}
+  .advice.tie{border-color:var(--line)}
+  .advice.tie .big{color:var(--dim)}
+
   /* ---- teclado ---- */
   .pad{background:var(--card2); border:1px solid var(--line); border-radius:18px; padding:9px; transition:box-shadow .18s ease}
-  .disp{display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--line); padding-bottom:5px; transition:opacity .18s ease}
+  .disp{display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--line); padding-bottom:5px; transition:opacity .18s ease; min-width:0}
   .disp.off{opacity:.4}
   .unit-btn{
     flex:0 0 auto; background:#3a3a3c; color:#fff; border:1px solid var(--line); border-radius:9px;
     padding:4px 9px; font-size:13px; font-weight:800; cursor:pointer; line-height:1.15; text-align:center;
   }
-  .unit-btn small{display:block; font-size:7px; font-weight:700; color:var(--dim); letter-spacing:.3px}
+  .unit-btn small{display:block; font-size:6.5px; font-weight:700; color:var(--dim); letter-spacing:.2px; text-transform:uppercase}
   .unit-btn:active{background:#4a4a4e}
-  .resline{display:flex; align-items:flex-end; gap:8px}
-  .resline .who{font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.4px; color:var(--glow); white-space:nowrap; padding-bottom:9px}
-  .resline .who.idle{color:var(--dim2)}
-  .keyzone{border:1px solid transparent; border-radius:15px; padding:6px 5px 5px; margin:0 -5px -5px; transition:box-shadow .18s ease}
-  /* escribiendo en un campo de arriba solo sirven números, AC, decimal y borrar */
-  .keyzone.only-num .sendto,
-  .keyzone.only-num .chip,
-  .keyzone.only-num .key.op,
-  .keyzone.only-num .key.fn:not(.keep){opacity:.22; pointer-events:none}
-  .sendto,.chip,.key{transition:opacity .18s ease}
   .expr{
     flex:1; min-width:0; background:transparent; border:none; color:#fff; font-size:15px;
     padding:2px 2px 4px; outline:none; text-align:right; caret-color:var(--glow);
     font-variant-numeric:tabular-nums; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
   }
   .expr::placeholder{font-family:-apple-system,sans-serif; font-size:11px; color:var(--dim2)}
-  .expr.off{opacity:.4}
-  .res{flex:1; min-width:0; min-height:40px; display:flex; align-items:center; justify-content:flex-end; padding:2px 4px; font-size:32px; font-weight:300; font-variant-numeric:tabular-nums; overflow:hidden}
+  .resline{display:flex; align-items:flex-end; gap:8px; min-width:0}
+  .resline .who{font-size:8.5px; font-weight:800; text-transform:uppercase; letter-spacing:.3px; color:var(--glow); white-space:nowrap; padding-bottom:9px; overflow:hidden; text-overflow:ellipsis; max-width:45%}
+  .resline .who.idle{color:var(--dim2)}
+  .res{flex:1; min-width:0; min-height:38px; display:flex; align-items:center; justify-content:flex-end; padding:2px 4px; font-size:30px; font-weight:300; font-variant-numeric:tabular-nums; letter-spacing:-1px; overflow:hidden; white-space:nowrap}
   .res.err{color:var(--dim2); font-size:15px}
-  .res u{font-size:14px; color:var(--dim); text-decoration:none; margin-right:5px; font-weight:600}
+  .res u{font-size:13px; color:var(--dim); text-decoration:none; margin-right:5px; font-weight:600; letter-spacing:0}
+  .keyzone{border:1px solid transparent; border-radius:15px; padding:6px 5px 5px; margin:0 -5px -5px; transition:box-shadow .18s ease}
+  .keyzone.only-num .sendto,
+  .keyzone.only-num .chip,
+  .keyzone.only-num .key.op,
+  .keyzone.only-num .key.fn:not(.keep){opacity:.22; pointer-events:none}
+  .sendto,.chip,.key{transition:opacity .18s ease}
   .sendto{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-bottom:7px}
-  .sendto button{border:1px solid var(--line); background:#2c2c2e; color:var(--dim); border-radius:9px; padding:6px 2px; font-size:10px; font-weight:700; cursor:pointer}
+  .sendto button{border:1px solid var(--line); background:#2c2c2e; color:var(--dim); border-radius:9px; padding:6px 2px; font-size:9.5px; font-weight:700; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .sendto button:active{background:#3a3a3c; color:#fff}
   .chips{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px; margin-bottom:7px}
-  .chip{border:1px solid; background:transparent; border-radius:10px; padding:5px 1px; cursor:pointer; line-height:1.25}
-  .chip .main{display:block; font-size:10.5px; font-weight:800; white-space:nowrap}
-  .chip .rt{display:block; font-size:8.5px; font-weight:600; opacity:.8; font-variant-numeric:tabular-nums}
+  .chip{border:1px solid; background:transparent; border-radius:10px; padding:4px 1px; cursor:pointer; line-height:1.2; overflow:hidden; min-width:0}
+  .chip .main{display:block; font-size:9.5px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .chip .rt{display:block; font-size:8px; font-weight:600; opacity:.8; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .chip:active{filter:brightness(1.7)}
   .c-bcv{color:var(--bcv); border-color:#ff453a55; background:#ff453a14}
   .c-par{color:var(--par); border-color:#30d15855; background:#30d15814}
   .c-bin{color:var(--bin); border-color:#ffd60a55; background:#ffd60a14}
+  .c-byb{color:var(--byb); border-color:#5ac8fa55; background:#5ac8fa14}
   .c-eur{color:var(--eur); border-color:#0a84ff55; background:#0a84ff14}
+  .c-zel{color:var(--zel); border-color:#bf5af255; background:#bf5af214}
+  .c-ppl{color:var(--ppl); border-color:#7d8cff55; background:#7d8cff14}
+  .c-prom{color:var(--prom); border-color:#c7c7cc55; background:#c7c7cc14}
   .keys{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px}
-  .key{height:46px; border:none; border-radius:12px; background:#3a3a3c; color:#fff; font-size:21px; font-weight:500; cursor:pointer; font-variant-numeric:tabular-nums}
+  .key{height:44px; border:none; border-radius:12px; background:#3a3a3c; color:#fff; font-size:20px; font-weight:500; cursor:pointer; font-variant-numeric:tabular-nums}
   .key:active{filter:brightness(1.5)}
   .key.num{background:#48484a}
   .key.op{background:var(--op); font-weight:600}
-  .key.fn{background:#5a5a5e; font-size:17px}
-  .key.ac{background:#a5a5a5; color:#000; font-weight:700; font-size:17px}
+  .key.fn{background:#5a5a5e; font-size:16px}
+  .key.ac{background:#a5a5a5; color:#000; font-weight:700; font-size:16px}
 
-  .toast{position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:#fff; color:#000; font-size:12px; font-weight:700; padding:8px 16px; border-radius:20px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:9}
+  .toast{position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:#fff; color:#000; font-size:12px; font-weight:700; padding:8px 16px; border-radius:20px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:9; max-width:90vw; text-align:center}
   .toast.show{opacity:.95}
 </style>
 </head>
@@ -181,30 +218,13 @@
     <div class="ts" id="stamp">…</div>
   </header>
 
-  <section class="rates">
-    <div class="rate r-bcv blk" id="wrap-bcv">
-      <label for="bcv">BCV</label>
-      <input id="bcv" type="text" inputmode="none" autocomplete="off" placeholder="—" aria-label="Tasa BCV">
-    </div>
-    <div class="rate r-par blk" id="wrap-par">
-      <label for="par">Paralelo</label>
-      <input id="par" type="text" inputmode="none" autocomplete="off" placeholder="—" aria-label="Tasa paralelo">
-    </div>
-    <div class="rate r-bin blk" id="wrap-bin">
-      <label for="bin">Binance</label>
-      <input id="bin" type="text" inputmode="none" autocomplete="off" placeholder="—" aria-label="Tasa Binance">
-    </div>
-    <div class="rate r-eur blk" id="wrap-eur">
-      <label for="eur">Euro BCV</label>
-      <input id="eur" type="text" inputmode="none" autocomplete="off" placeholder="—" aria-label="Tasa euro BCV">
-    </div>
-  </section>
+  <section class="rates" id="rates"></section>
 
   <section class="cols">
     <div class="blk" id="blk-price">
-      <p class="field-label">Precio en $</p>
+      <p class="field-label">Precio pagando en $</p>
       <div class="field" id="fld-price">
-        <input id="price" type="text" inputmode="none" autocomplete="off" placeholder="0" aria-label="Precio en dólares">
+        <input id="price" type="text" inputmode="none" autocomplete="off" placeholder="0" aria-label="Precio pagando en dólares">
         <div class="sep"></div>
         <input id="disc" class="disc" type="text" inputmode="none" autocomplete="off" placeholder="0" aria-label="Descuento por ciento">
         <div class="pct">% desc</div>
@@ -212,12 +232,12 @@
       <div class="hint" id="hintPrice"><div class="empty">Ingresa el precio…</div></div>
     </div>
     <div class="blk" id="blk-pay">
-      <p class="field-label" id="payLabel">Pagando en Bs</p>
+      <p class="field-label">Precio pagando en Bs</p>
       <div class="field" id="fld-pay">
-        <button class="cur-btn" id="cur" type="button" data-cur="Bs" aria-label="Cambiar entre bolívares y dólares">
-          <span id="curTxt">Bs</span><small>cambiar</small>
+        <button class="cur-btn" id="cur" type="button" data-cur="Bs" aria-label="Mostrar ese precio en bolívares o en dólares">
+          <small>mostrar en</small><b id="curTxt">Bs</b>
         </button>
-        <input id="pay" type="text" inputmode="none" autocomplete="off" placeholder="0" aria-label="Precio en bolívares">
+        <input id="pay" type="text" inputmode="none" autocomplete="off" placeholder="0" aria-label="Precio pagando en bolívares">
       </div>
       <div class="hint" id="hintPay"><div class="empty">Ingresa el monto…</div></div>
     </div>
@@ -232,12 +252,16 @@
       <div class="tag" id="impTag">Esperando</div>
     </div>
     <div class="extra" id="impExtra"></div>
+    <div class="advice" id="advice">
+      <div class="head"><span class="big" id="adviceBig"></span><span class="save" id="adviceSave"></span></div>
+      <div class="why" id="adviceWhy"></div>
+    </div>
   </section>
 
   <section class="pad" id="pad">
     <div class="disp" id="disp">
       <button class="unit-btn" id="calcCur" type="button" data-cur="Bs" aria-label="Unidad del cálculo">
-        <span id="calcCurTxt">Bs</span><small>unidad</small>
+        <small>unidad</small><span id="calcCurTxt">Bs</span>
       </button>
       <input class="expr" id="expr" type="text" inputmode="none" autocomplete="off" autocorrect="off"
              spellcheck="false" placeholder="0">
@@ -248,44 +272,39 @@
     </div>
 
     <div class="keyzone" id="keyzone">
-    <div class="sendto">
-      <button id="toPrice" type="button">↑ Al precio en $</button>
-      <button id="toPay" type="button">↑ A pagando en Bs</button>
-    </div>
+      <div class="sendto">
+        <button id="toPrice" type="button">↑ Al precio en $</button>
+        <button id="toPay" type="button">↑ A pagando en Bs</button>
+      </div>
 
-    <div class="chips">
-      <button class="chip c-bcv" data-rate="bcv" type="button"><span class="main">a $ BCV</span><span class="rt" id="chip-bcv">—</span></button>
-      <button class="chip c-par" data-rate="par" type="button"><span class="main">a $ Paralelo</span><span class="rt" id="chip-par">—</span></button>
-      <button class="chip c-bin" data-rate="bin" type="button"><span class="main">a $ Binance</span><span class="rt" id="chip-bin">—</span></button>
-      <button class="chip c-eur" data-rate="eur" type="button"><span class="main">a € BCV</span><span class="rt" id="chip-eur">—</span></button>
-    </div>
+      <div class="chips" id="chips"></div>
 
-    <div class="keys">
-      <button class="key ac" id="kClear" type="button">AC</button>
-      <button class="key fn" data-ins="(" type="button">(</button>
-      <button class="key fn" data-ins=")" type="button">)</button>
-      <button class="key op" data-ins="/" type="button">÷</button>
+      <div class="keys">
+        <button class="key ac" id="kClear" type="button">AC</button>
+        <button class="key fn" data-ins="(" type="button">(</button>
+        <button class="key fn" data-ins=")" type="button">)</button>
+        <button class="key op" data-ins="/" type="button">÷</button>
 
-      <button class="key num" data-ins="7" type="button">7</button>
-      <button class="key num" data-ins="8" type="button">8</button>
-      <button class="key num" data-ins="9" type="button">9</button>
-      <button class="key op" data-ins="*" type="button">×</button>
+        <button class="key num" data-ins="7" type="button">7</button>
+        <button class="key num" data-ins="8" type="button">8</button>
+        <button class="key num" data-ins="9" type="button">9</button>
+        <button class="key op" data-ins="*" type="button">×</button>
 
-      <button class="key num" data-ins="4" type="button">4</button>
-      <button class="key num" data-ins="5" type="button">5</button>
-      <button class="key num" data-ins="6" type="button">6</button>
-      <button class="key op" data-ins="-" type="button">−</button>
+        <button class="key num" data-ins="4" type="button">4</button>
+        <button class="key num" data-ins="5" type="button">5</button>
+        <button class="key num" data-ins="6" type="button">6</button>
+        <button class="key op" data-ins="-" type="button">−</button>
 
-      <button class="key num" data-ins="1" type="button">1</button>
-      <button class="key num" data-ins="2" type="button">2</button>
-      <button class="key num" data-ins="3" type="button">3</button>
-      <button class="key op" data-ins="+" type="button">+</button>
+        <button class="key num" data-ins="1" type="button">1</button>
+        <button class="key num" data-ins="2" type="button">2</button>
+        <button class="key num" data-ins="3" type="button">3</button>
+        <button class="key op" data-ins="+" type="button">+</button>
 
-      <button class="key num" data-ins="0" type="button">0</button>
-      <button class="key num" id="kDec" data-ins="," type="button">,</button>
-      <button class="key fn keep" id="kDel" type="button">⌫</button>
-      <button class="key op" id="kEq" type="button">=</button>
-    </div>
+        <button class="key num" data-ins="0" type="button">0</button>
+        <button class="key num" id="kDec" data-ins="," type="button">,</button>
+        <button class="key fn keep" id="kDel" type="button">⌫</button>
+        <button class="key op" id="kEq" type="button">=</button>
+      </div>
     </div>
   </section>
 </div>
@@ -298,29 +317,26 @@
 
   var API_USD = 'https://ve.dolarapi.com/v1/dolares';
   var API_EUR = 'https://ve.dolarapi.com/v1/euros';
-  var API_BIN = 'https://criptoya.com/api/usdt/ves/1';
+  var API_P2P = 'https://criptoya.com/api/usdt/ves/1';
   var CACHE_KEY = 'calculadolar.rates';
-  var KEYS = ['bcv','par','bin','eur'];
-  var LABEL = {bcv:'BCV', par:'Paralelo', bin:'Binance', eur:'Euro BCV'};
-  var SHORT = {bcv:'BCV', par:'Paral.', bin:'Binance', eur:'Euro'};
-  var NAME  = {bcv:'Tasa BCV', par:'Tasa paralelo', bin:'Tasa Binance', eur:'Tasa euro BCV',
-               price:'Precio en $', disc:'Descuento %', expr:'Cálculo libre'};
+  var MANUAL_KEY = 'calculadolar.manual';
 
-  var api = {bcv:null, par:null, bin:null, eur:null, fetchedAt:null, stale:false};
+  /* las ocho tasas */
+  var KEYS   = ['bcv','par','bin','byb','eur','zel','ppl','prom'];
+  var AUTO   = ['bcv','par','bin','byb','eur'];   // bajan solas
+  var MANUAL = ['zel','ppl'];                     // solo a mano, se quedan guardadas
+  var MARKET = ['par','bin','byb','zel','ppl'];   // a estas puedes vender tu dólar
+  var LABEL = {bcv:'BCV', par:'Paralelo', bin:'Binance', byb:'Bybit', eur:'Euro BCV', zel:'Zelle', ppl:'PayPal', prom:'Promedio'};
+  var TAB   = {bcv:'BCV', par:'PARALELO', bin:'BINANCE', byb:'BYBIT', eur:'EURO BCV', zel:'ZELLE ✎', ppl:'PAYPAL ✎', prom:'PROMEDIO'};
+  var SHORT = {bcv:'BCV', par:'PAR', bin:'BIN', byb:'BYB', eur:'EUR', zel:'ZEL', ppl:'PPL', prom:'PRO'};
+  var CHIP  = {bcv:'a $ BCV', par:'a $ Paral.', bin:'a $ Binance', byb:'a $ Bybit', eur:'a € BCV', zel:'a $ Zelle', ppl:'a $ PayPal', prom:'a $ Prom.'};
+
+  var api = {fetchedAt:null, stale:false};
+  KEYS.forEach(function(k){ api[k] = null; });
   var active = null;
   var $ = function(id){ return document.getElementById(id); };
   function curr(){ return $('cur').dataset.cur; }
   function calcCur(){ return $('calcCur').dataset.cur; }
-  function setCur(u){
-    $('cur').dataset.cur = u;
-    $('curTxt').textContent = u;
-    $('payLabel').textContent = 'Pagando en ' + u;
-  }
-  function setCalcCur(u){
-    $('calcCur').dataset.cur = u;
-    $('calcCurTxt').textContent = u;
-    $('toPay').textContent = '↑ A pagando en ' + u;
-  }
 
   /* ---------- números ---------- */
   function ok(n){ return typeof n === 'number' && isFinite(n); }
@@ -335,13 +351,13 @@
     d = (d === undefined) ? 2 : d;
     return n.toLocaleString('es-VE', {minimumFractionDigits:d, maximumFractionDigits:d});
   }
-  /* el dólar escribe 3,000.00 y el bolívar 3.000,00 */
   function fmtU(n, unit, d){
     if(!ok(n)) return '—';
     d = (d === undefined) ? 2 : d;
-    return n.toLocaleString(unit === '$' ? 'en-US' : 'es-VE',
-      {minimumFractionDigits:d, maximumFractionDigits:d});
+    return n.toLocaleString(unit === '$' ? 'en-US' : 'es-VE', {minimumFractionDigits:d, maximumFractionDigits:d});
   }
+  /* en los desgloses, de diez mil para arriba los céntimos sobran y no caben */
+  function fmtS(n){ return ok(n) ? fmt(n, Math.abs(n) >= 10000 ? 0 : 2) : '—'; }
   function pct(n){
     if(!ok(n)) return '—';
     if(Math.abs(n) < 0.05) return '0 %';
@@ -351,14 +367,21 @@
     if(!ok(n)) return '';
     return String(parseFloat(n.toFixed(6))).replace('.', sep || ',');
   }
-  function rate(k){
-    var manual = num($(k).value);
-    if(ok(manual) && manual > 0) return manual;
-    return api[k];
+
+  function typed(k){
+    var v = num($(k).value);
+    return (ok(v) && v > 0) ? v : NaN;
   }
-  function isManual(k){
-    var manual = num($(k).value);
-    return ok(manual) && manual > 0;
+  function isManual(k){ return ok(typed(k)); }
+  function rate(k){
+    var t = typed(k);
+    if(ok(t)) return t;
+    if(k === 'prom'){
+      var sum = 0, n = 0;
+      MARKET.forEach(function(m){ var v = rate(m); if(ok(v) && v > 0){ sum += v; n++; } });
+      return n ? sum / n : null;
+    }
+    return api[k];
   }
 
   /* ---------- evaluador (sin eval) ---------- */
@@ -410,15 +433,33 @@
     return out;
   }
 
-  /* ---------- foco: campo encendido, resto apagado ---------- */
-  var FIELDS = ['bcv','par','bin','eur','price','disc','pay','expr'];
+  /* ---------- se arma la fila de tasas y los botones ---------- */
+  function build(){
+    var rows = KEYS.map(function(k){
+      return '<div class="rate r-' + k + ' blk" id="wrap-' + k + '">' +
+               '<label for="' + k + '">' + TAB[k] + '</label>' +
+               '<input id="' + k + '" type="text" inputmode="none" autocomplete="off" placeholder="—" aria-label="Tasa ' + LABEL[k] + '">' +
+             '</div>';
+    }).join('');
+    $('rates').innerHTML = rows;
+    $('chips').innerHTML = KEYS.map(function(k){
+      return '<button class="chip c-' + k + '" data-rate="' + k + '" type="button">' +
+               '<span class="main">' + CHIP[k] + '</span>' +
+               '<span class="rt" id="chip-' + k + '">—</span>' +
+             '</button>';
+    }).join('');
+  }
 
+  /* ---------- foco ---------- */
+  var FIELDS = KEYS.concat(['price','disc','pay','expr']);
   function fieldName(el){
     if(!el) return 'Cálculo libre';
-    if(el.id === 'pay') return 'Pagando en ' + curr();
-    return NAME[el.id] || '';
+    if(el.id === 'pay') return 'Pagando en Bs';
+    if(el.id === 'price') return 'Precio en $';
+    if(el.id === 'disc') return 'Descuento %';
+    if(el.id === 'expr') return 'Cálculo libre';
+    return 'Tasa ' + LABEL[el.id];
   }
-  /* la coma y el punto se alternan según lo que estés metiendo */
   function decFor(el){
     if(el && el.id === 'price') return '.';
     if(el && el.id === 'pay') return (curr() === '$') ? '.' : ',';
@@ -437,14 +478,11 @@
     KEYS.forEach(function(k){
       $('wrap-' + k).classList.toggle('lit-ring', !!active && active.id === k);
     });
-    /* si escribes arriba, solo se encienden las teclas; el campo de la
-       calculadora se queda apagado para que no parezca que hay dos activos */
     var onCalc = !!active && active.id === 'expr';
     $('pad').classList.toggle('lit-ring', onCalc);
     $('keyzone').classList.toggle('lit-ring', !!active && !onCalc);
     $('keyzone').classList.toggle('only-num', !!active && !onCalc);
     $('disp').classList.toggle('off', !!active && !onCalc);
-    $('expr').classList.toggle('off', false);
     var who = $('resFor');
     who.textContent = fieldName(active);
     who.classList.toggle('idle', !active);
@@ -457,9 +495,10 @@
   /* ---------- pintar ---------- */
   function paint(){
     KEYS.forEach(function(k){
-      $(k).placeholder = (api[k] === null) ? '—' : fmt(api[k]);
+      var auto = (k === 'prom') ? (isManual(k) ? null : rate(k)) : api[k];
+      $(k).placeholder = ok(auto) ? fmt(auto) : (MANUAL.indexOf(k) >= 0 ? 'a mano' : '—');
       $('chip-' + k).textContent = ok(rate(k)) ? '(' + fmt(rate(k)) + ')' : '—';
-      $('wrap-' + k).classList.toggle('is-edited', isManual(k));
+      $('wrap-' + k).classList.toggle('is-edited', isManual(k) && MANUAL.indexOf(k) < 0);
     });
     var st = $('stamp');
     if(api.fetchedAt){
@@ -476,19 +515,30 @@
   function loadCache(){
     try{
       var c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
-      if(!c) return;
-      KEYS.forEach(function(k){ if(typeof c[k] === 'number') api[k] = c[k]; });
-      api.fetchedAt = c.fetchedAt || null;
-      api.stale = true;
+      if(c){
+        AUTO.forEach(function(k){ if(typeof c[k] === 'number') api[k] = c[k]; });
+        api.fetchedAt = c.fetchedAt || null;
+        api.stale = true;
+      }
+      var m = JSON.parse(localStorage.getItem(MANUAL_KEY) || 'null');
+      if(m) MANUAL.forEach(function(k){ if(m[k]) $(k).value = m[k]; });
     }catch(e){}
   }
   function saveCache(){
     try{
-      localStorage.setItem(CACHE_KEY, JSON.stringify({
-        bcv:api.bcv, par:api.par, bin:api.bin, eur:api.eur, fetchedAt:api.fetchedAt
-      }));
+      var o = {fetchedAt:api.fetchedAt};
+      AUTO.forEach(function(k){ o[k] = api[k]; });
+      localStorage.setItem(CACHE_KEY, JSON.stringify(o));
     }catch(e){}
   }
+  function saveManual(){
+    try{
+      var o = {};
+      MANUAL.forEach(function(k){ o[k] = $(k).value; });
+      localStorage.setItem(MANUAL_KEY, JSON.stringify(o));
+    }catch(e){}
+  }
+
   function pickSource(list, fuente){
     if(!list || !list.length) return null;
     for(var i = 0; i < list.length; i++){
@@ -500,17 +550,13 @@
     }
     return null;
   }
-  function pickP2P(data){
-    if(!data) return null;
-    var books = ['binancep2p','bybitp2p','okexp2p'];
-    for(var i = 0; i < books.length; i++){
-      var b = data[books[i]];
-      if(!b) continue;
-      var ask = ok(b.totalAsk) ? b.totalAsk : b.ask;
-      var bid = ok(b.totalBid) ? b.totalBid : b.bid;
-      if(ok(ask) && ok(bid) && ask > 0 && bid > 0) return (ask + bid) / 2;
-      if(ok(ask) && ask > 0) return ask;
-    }
+  function pickBook(data, name){
+    if(!data || !data[name]) return null;
+    var b = data[name];
+    var ask = ok(b.totalAsk) ? b.totalAsk : b.ask;
+    var bid = ok(b.totalBid) ? b.totalBid : b.bid;
+    if(ok(ask) && ok(bid) && ask > 0 && bid > 0) return (ask + bid) / 2;
+    if(ok(ask) && ask > 0) return ask;
     return null;
   }
   function getJSON(url){
@@ -522,15 +568,18 @@
   function fetchRates(){
     var btn = $('btnRefresh');
     btn.classList.add('spin');
-    KEYS.forEach(function(k){ $(k).value = ''; });
-    return Promise.all([getJSON(API_USD), getJSON(API_EUR), getJSON(API_BIN)]).then(function(res){
+    AUTO.forEach(function(k){ $(k).value = ''; });   // las de a mano NO se borran
+    $('prom').value = '';
+    return Promise.all([getJSON(API_USD), getJSON(API_EUR), getJSON(API_P2P)]).then(function(res){
       var got = 0;
-      var a = pickSource(res[0], 'oficial'), b = pickSource(res[0], 'paralelo');
-      var c = pickSource(res[1], 'oficial'), d = pickP2P(res[2]);
-      if(ok(a)){ api.bcv = a; got++; }
-      if(ok(b)){ api.par = b; got++; }
-      if(ok(c)){ api.eur = c; got++; }
-      if(ok(d)){ api.bin = d; got++; }
+      var v = {
+        bcv: pickSource(res[0], 'oficial'),
+        par: pickSource(res[0], 'paralelo'),
+        eur: pickSource(res[1], 'oficial'),
+        bin: pickBook(res[2], 'binancep2p'),
+        byb: pickBook(res[2], 'bybitp2p')
+      };
+      AUTO.forEach(function(k){ if(ok(v[k])){ api[k] = v[k]; got++; } });
       if(got){ api.fetchedAt = Date.now(); api.stale = false; saveCache(); }
       else { toast('No se pudieron bajar las tasas'); }
       paint();
@@ -540,12 +589,13 @@
   /* ---------- comparador ---------- */
   function rows(defs){
     return defs.map(function(d){
-      return '<div class="row ' + d.cls + '"><span>' + d.name + '</span><b>' + d.value + '</b></div>';
+      return '<div class="row k-' + d.k + (d.wide ? ' wide' : '') + '"><span>' + d.name + '</span><b>' + d.value + '</b></div>';
     }).join('');
   }
 
   function compute(){
-    var R = {bcv:rate('bcv'), par:rate('par'), bin:rate('bin'), eur:rate('eur')};
+    var R = {};
+    KEYS.forEach(function(k){ R[k] = rate(k); });
     var list = num($('price').value);
     var desc = num($('disc').value);
     if(!ok(desc) || desc < 0) desc = 0;
@@ -553,27 +603,29 @@
     var net = ok(list) ? list * (1 - desc / 100) : NaN;
     var pay = num($('pay').value);
     var cur = curr();
+    /* el campo derecho SIEMPRE es el precio pagando en bolívares;
+       si lo estás viendo en $, se pasa a Bs con el BCV, que es como lo cotizan */
+    var payBs = ok(pay) ? (cur === 'Bs' ? pay : (ok(R.bcv) ? pay * R.bcv : NaN)) : NaN;
 
     var hp = $('hintPrice');
     if(ok(net) && net > 0){
-      var defs = KEYS.map(function(k){
-        return {cls:'k-' + k, name:SHORT[k], value:(ok(R[k]) && R[k] > 0) ? 'Bs ' + fmt(net * R[k]) : '—'};
-      });
       var head = desc > 0
-        ? '<div class="row net"><span>Neto</span><b>$ ' + fmt(net) + ' (−' + fmt(desc, 1) + '%)</b></div>'
+        ? '<div class="row net wide"><span>NETO</span><b>$ ' + fmt(net) + ' (−' + fmt(desc, 1) + '%)</b></div>'
         : '';
-      hp.innerHTML = head + rows(defs);
+      hp.innerHTML = head + rows(KEYS.map(function(k){
+        return {k:k, name:SHORT[k], value:(ok(R[k]) && R[k] > 0) ? fmtS(net * R[k]) : '—'};
+      }));
     } else {
       hp.innerHTML = '<div class="empty">Ingresa el precio…</div>';
     }
 
     var hq = $('hintPay');
-    if(ok(pay) && pay > 0){
+    if(ok(payBs) && payBs > 0){
       hq.innerHTML = rows(KEYS.map(function(k){
-        var v = R[k], out = '—';
-        if(ok(v) && v > 0) out = (cur === 'Bs') ? '$ ' + fmt(pay / v) : 'Bs ' + fmt(pay * v);
-        return {cls:'k-' + k, name:SHORT[k], value:out};
+        return {k:k, name:SHORT[k], value:(ok(R[k]) && R[k] > 0) ? '$' + fmt(payBs / R[k]) : '—'};
       }));
+    } else if(ok(pay) && pay > 0){
+      hq.innerHTML = '<div class="empty">Falta la tasa BCV…</div>';
     } else {
       hq.innerHTML = '<div class="empty">Ingresa el monto…</div>';
     }
@@ -582,19 +634,21 @@
     var dimmed = box.classList.contains('dim');
     box.className = 'verdict blk' + (dimmed ? ' dim' : '');
     var extra = $('impExtra');
-    var usable = ok(net) && net > 0 && ok(pay) && pay > 0 && ok(R.bcv) && R.bcv > 0;
+    var adv = $('advice');
+    var usable = ok(net) && net > 0 && ok(payBs) && payBs > 0 && ok(R.bcv) && R.bcv > 0;
 
     if(!usable){
       $('impRate').innerHTML = '--,--<small> Bs/$</small>';
       $('impTag').textContent = 'Esperando';
       extra.innerHTML = '';
+      adv.className = 'advice';
       box.dataset.imp = '';
       box.dataset.tag = '';
+      box.dataset.advice = '';
       return;
     }
 
-    var costBs = (cur === 'Bs') ? pay : pay * R.bcv;
-    var imp = costBs / net;
+    var imp = payBs / net;
     $('impRate').innerHTML = fmt(imp) + '<small> Bs/$</small>';
 
     var match = null, best = 0.01;
@@ -606,12 +660,16 @@
 
     var tone = 'mid', tag = 'Tasa mixta / inflada';
     if(match === 'bcv'){ tone = 'ok'; tag = 'Te cobran a tasa BCV'; }
+    else if(match === 'eur'){ tone = 'eur'; tag = '🚩 Te cobran a tasa EURO'; }
     else if(match === 'par'){ tone = 'bad'; tag = 'Te cobran a paralelo'; }
     else if(match === 'bin'){ tone = 'mid'; tag = 'Te cobran a tasa Binance'; }
-    else if(match === 'eur'){ tone = 'eur'; tag = '🚩 Te cobran a tasa EURO'; }
+    else if(match === 'byb'){ tone = 'mid'; tag = 'Te cobran a tasa Bybit'; }
+    else if(match === 'zel'){ tone = 'mid'; tag = 'Te cobran a tasa Zelle'; }
+    else if(match === 'ppl'){ tone = 'mid'; tag = 'Te cobran a tasa PayPal'; }
     else if(imp <= R.bcv * 1.005){ tone = 'ok'; tag = 'Mejor que el BCV'; }
     else {
-      var top = Math.max(ok(R.par) ? R.par : 0, ok(R.bin) ? R.bin : 0, ok(R.eur) ? R.eur : 0);
+      var top = 0;
+      MARKET.concat(['eur']).forEach(function(k){ if(ok(R[k]) && R[k] > top) top = R[k]; });
       if(top > 0 && imp > top * 1.01){ tone = 'bad'; tag = 'Por encima de todas'; }
     }
     box.classList.add(tone);
@@ -620,18 +678,58 @@
     var over = (imp / R.bcv - 1) * 100;
     var line = '<span class="' + (over > 0.05 ? 'up' : 'down') + '">' + pct(over) + '</span> sobre el BCV';
     if(desc > 0){
-      var real = (1 - costBs / (list * R.bcv)) * 100;
+      var real = (1 - payBs / (list * R.bcv)) * 100;
       line += ' · dicen −' + fmt(desc, 1) + '%';
-      if(real >= 0.05) line += ' y el descuento real es <b class="down">−' + fmt(real, 1) + ' %</b>';
-      else if(real <= -0.05) line += ' pero terminas pagando <b class="up">' + fmt(-real, 1) + ' % de más</b>';
-      else line += ' y el descuento real es <b>0 %</b>';
+      if(real >= 0.05) line += ' y el real es <b class="down">−' + fmt(real, 1) + ' %</b>';
+      else if(real <= -0.05) line += ' pero pagas <b class="up">' + fmt(-real, 1) + ' % de más</b>';
+      else line += ' y el real es <b>0 %</b>';
     }
     if(match === 'eur'){
       line += '<br>El euro no es tasa de pago: son ' + pct(over) + ' de más disfrazados de “oficial”.';
     }
     extra.innerHTML = line;
+
+    /* ---- cómo te conviene pagar ----
+       Comparamos los dos precios que te dan. Para poder compararlos hay que saber
+       cuánto vale tu dólar: la mejor tasa de mercado a la que puedes venderlo. */
+    var refV = 0, refK = null;
+    MARKET.forEach(function(k){ if(ok(R[k]) && R[k] > refV){ refV = R[k]; refK = k; } });
+    if(refK){
+      var payBsInUsd = payBs / refV;          // lo que te cuesta, en dólares, pagando en Bs
+      var diff = net - payBsInUsd;            // + = pagar en Bs sale más barato
+      var rel = diff / net;
+      var cls, big, save, why;
+      if(rel > 0.005){
+        cls = 'bs'; big = 'Te conviene pagar en Bs';
+        save = 'ahorras $ ' + fmtU(diff, '$');
+        why = 'Bs ' + fmtS(payBs) + ' son $ ' + fmtU(payBsInUsd, '$') +
+              ' vendiendo a ' + LABEL[refK] + ' (' + fmt(refV) + '), y en efectivo te piden $ ' + fmtU(net, '$') + '.';
+      } else if(rel < -0.005){
+        cls = 'usd'; big = 'Te conviene pagar en $';
+        save = 'ahorras $ ' + fmtU(-diff, '$');
+        why = 'Pagar esos Bs ' + fmtS(payBs) + ' te cuesta $ ' + fmtU(payBsInUsd, '$') +
+              ' a ' + LABEL[refK] + ' (' + fmt(refV) + '), y en efectivo te piden $ ' + fmtU(net, '$') + '.';
+      } else {
+        cls = 'tie'; big = 'Da igual como pagues';
+        save = '';
+        why = 'Los dos precios salen casi iguales midiendo tu dólar a ' + LABEL[refK] + ' (' + fmt(refV) + ').';
+      }
+      adv.className = 'advice on ' + cls;
+      $('adviceBig').textContent = big;
+      $('adviceSave').textContent = save;
+      $('adviceWhy').textContent = why;
+      box.dataset.advice = big + (save ? ' · ' + save : '');
+      box.dataset.adviceWhy = why;
+    } else {
+      adv.className = 'advice';
+      box.dataset.advice = '';
+      box.dataset.adviceWhy = '';
+    }
+
     box.dataset.imp = imp;
     box.dataset.tag = tag;
+    box.dataset.paybs = payBs;
+    box.dataset.net = net;
   }
 
   /* ---------- teclado ---------- */
@@ -644,9 +742,9 @@
       var v = evaluate(raw);
       if(!ok(v)) throw new Error('∞');
       box.className = 'res';
-      var dec = (Math.abs(v % 1) > 1e-9) ? 2 : 0;
-      if(el.id === 'expr') box.innerHTML = '<u>' + calcCur() + '</u>' + fmtU(v, calcCur(), dec);
-      else box.textContent = fmt(v, dec);
+      var d = (Math.abs(v % 1) > 1e-9) ? 2 : 0;
+      if(el.id === 'expr') box.innerHTML = '<u>' + calcCur() + '</u>' + fmtU(v, calcCur(), d);
+      else box.textContent = fmt(v, d);
       box.dataset.value = v;
     }catch(e){
       box.className = 'res err';
@@ -654,7 +752,11 @@
       box.dataset.value = '';
     }
   }
-  function afterEdit(){ paint(); showResult(); }
+  function afterEdit(){
+    MANUAL.forEach(function(k){ if(active && active.id === k) saveManual(); });
+    paint();
+    showResult();
+  }
 
   function insert(text){
     var el = target();
@@ -701,11 +803,9 @@
     t.textContent = msg;
     t.classList.add('show');
     clearTimeout(toast._t);
-    toast._t = setTimeout(function(){ t.classList.remove('show'); }, 1700);
+    toast._t = setTimeout(function(){ t.classList.remove('show'); }, 1900);
   }
 
-  /* pulsar sin robar el foco del campo activo.
-     va por pointerdown: preventDefault() en touchstart cancela el click en iOS */
   function press(el, fn){
     if(window.PointerEvent){
       el.addEventListener('pointerdown', function(e){
@@ -723,17 +823,18 @@
   }
 
   /* ---------- eventos ---------- */
+  build();
+
   FIELDS.forEach(function(id){
     var el = $(id);
     el.addEventListener('focus', function(){ setActive(el); });
     el.addEventListener('click', function(){ setActive(el); });
-    el.addEventListener('input', afterEdit);          // teclado físico en el escritorio
+    el.addEventListener('input', afterEdit);
     el.addEventListener('keydown', function(e){
       if(e.key === 'Enter'){ e.preventDefault(); equals(); }
     });
   });
 
-  /* tocar fuera apaga el modo foco; tocar la tarjeta de una tasa enciende su campo */
   document.addEventListener('pointerdown', function(e){
     var t = e.target;
     if(t.closest && (t.closest('#pad') || t.closest('#cur'))) return;
@@ -747,15 +848,30 @@
     if(active){ active.blur(); setActive(null); }
   }, true);
 
+  /* el botón del campo derecho NO cambia el precio: lo muestra en la otra moneda */
+  press($('cur'), function(){
+    var from = curr(), to = (from === 'Bs') ? '$' : 'Bs';
+    var bcv = rate('bcv');
+    var v = num($('pay').value);
+    if(ok(v) && v > 0){
+      if(!ok(bcv) || bcv <= 0){ toast('Sin tasa BCV no puedo mostrarlo en la otra moneda'); return; }
+      var conv = (to === '$') ? v / bcv : v * bcv;
+      $('pay').value = plain(Math.round(conv * 100) / 100, (to === '$') ? '.' : ',');
+    }
+    $('cur').dataset.cur = to;
+    $('curTxt').textContent = to;
+    setActive(active);
+    afterEdit();
+  });
+
+  function setCalcCur(u){
+    $('calcCur').dataset.cur = u;
+    $('calcCurTxt').textContent = u;
+    $('toPay').textContent = '↑ A pagando en ' + u;
+  }
   press($('calcCur'), function(){
     setCalcCur(calcCur() === 'Bs' ? '$' : 'Bs');
     setActive(active);
-  });
-
-  press($('cur'), function(){
-    setCur(curr() === 'Bs' ? '$' : 'Bs');
-    setActive(active);
-    afterEdit();
   });
 
   document.querySelectorAll('.chip').forEach(function(b){
@@ -763,18 +879,16 @@
       var k = b.dataset.rate, v = rate(k);
       if(!ok(v)){ toast('Sin tasa de ' + LABEL[k]); return; }
       var el = target();
-      if(el.id !== 'expr') return;                     // arriba no aplica
+      if(el.id !== 'expr') return;
       var caret = (el.selectionStart === null) ? el.value.length : el.selectionStart;
       var before = el.value.slice(0, caret);
-      /* si vienes de un número, la tasa CONVIERTE: en $ multiplica (da Bs),
-         en Bs divide (da $), y la unidad del cálculo cambia sola */
       if(/[0-9.,)]\s*$/.test(before)){
         var toBs = (calcCur() === '$');
         insert((toBs ? '*' : '/') + plain(v, decFor(el)));
         setCalcCur(toBs ? 'Bs' : '$');
         setActive(el);
       } else {
-        insert(plain(v, decFor(el)));                  // ya pusiste tú el signo
+        insert(plain(v, decFor(el)));
       }
     });
   });
@@ -793,39 +907,43 @@
       afterEdit();
       toast('Precio: $ ' + fmtU(v, '$'));
     } else {
-      /* el precio de lista es en dólares: unos bolívares van al otro campo */
-      setCur('Bs');
+      if(curr() !== 'Bs'){ $('cur').dataset.cur = 'Bs'; $('curTxt').textContent = 'Bs'; }
       $('pay').value = plain(v, ',');
       afterEdit();
-      toast('Eso es Bs: va a Pagando en Bs');
+      toast('Eso es Bs: va al precio pagando en Bs');
     }
   });
   press($('toPay'), function(){
     var v = num($('expr').value);
     if(!ok(v)){ toast('Nada que enviar'); return; }
-    setCur(calcCur());
+    $('cur').dataset.cur = calcCur();
+    $('curTxt').textContent = calcCur();
     $('pay').value = plain(v, decFor($('pay')));
     afterEdit();
-    toast('Pagando en ' + curr() + ': ' + fmtU(v, curr()));
+    toast('Pagando en Bs, visto en ' + curr() + ': ' + fmtU(v, curr()));
   });
 
   $('btnRefresh').addEventListener('click', fetchRates);
-  $('btnShot').addEventListener('click', shareReceipt);
   $('btnCopy').addEventListener('click', function(){
     var L = [];
     L.push('Calculadolar · ' + new Date().toLocaleString('es-VE'));
     KEYS.forEach(function(k){
-      if(ok(rate(k))) L.push(LABEL[k] + ': ' + fmt(rate(k)) + ' Bs/$' + (isManual(k) ? ' (manual)' : ''));
+      if(ok(rate(k))) L.push(LABEL[k] + ': ' + fmt(rate(k)) + ' Bs/$' + (isManual(k) ? ' (a mano)' : ''));
     });
-    var list = num($('price').value), desc = num($('disc').value), pay = num($('pay').value);
+    var list = num($('price').value), desc = num($('disc').value);
+    var payBs = parseFloat($('verdict').dataset.paybs);
     if(ok(list) && list > 0){
-      L.push('Precio: $ ' + fmt(list) + (ok(desc) && desc > 0 ? ' con −' + fmt(desc,1) + '% = $ ' + fmt(list * (1 - desc/100)) : ''));
+      L.push('Precio pagando en $: ' + fmt(list) + (ok(desc) && desc > 0 ? ' con −' + fmt(desc,1) + '% = ' + fmt(list * (1 - desc/100)) : ''));
     }
-    if(ok(pay) && pay > 0) L.push('Pagando en ' + curr() + ': ' + fmt(pay));
+    if(ok(payBs) && payBs > 0) L.push('Precio pagando en Bs: ' + fmt(payBs));
     var imp = parseFloat($('verdict').dataset.imp);
     if(ok(imp)){
       L.push('Tasa implícita: ' + fmt(imp) + ' Bs/$ — ' + $('verdict').dataset.tag);
       L.push($('impExtra').innerText.replace(/\s+/g, ' ').trim());
+      if($('verdict').dataset.advice){
+        L.push('→ ' + $('verdict').dataset.advice);
+        L.push($('verdict').dataset.adviceWhy);
+      }
     }
     var ex = $('expr').value.trim(), exv = num(ex);
     if(ex && ok(exv)) L.push('Cálculo: ' + ex + ' = ' + calcCur() + ' ' + fmtU(exv, calcCur()));
@@ -837,9 +955,9 @@
     }
   });
 
-
   /* ---------- recibo en imagen ---------- */
-  var COL = {bcv:'#ff453a', par:'#30d158', bin:'#ffd60a', eur:'#0a84ff',
+  var COL = {bcv:'#ff453a', par:'#30d158', bin:'#ffd60a', byb:'#5ac8fa', eur:'#0a84ff',
+             zel:'#bf5af2', ppl:'#7d8cff', prom:'#c7c7cc',
              bg:'#0b0b0c', line:'#2e2e32', dim:'#8e8e93', dim2:'#5a5a5f', warn:'#ffd60a'};
 
   function roundRect(g, x, y, w, h, r){
@@ -855,7 +973,7 @@
   function buildReceipt(){
     var W = 760, PAD = 46;
     var c = document.createElement('canvas');
-    c.width = W; c.height = 1900;
+    c.width = W; c.height = 2200;
     var g = c.getContext('2d');
     g.fillStyle = COL.bg; g.fillRect(0, 0, W, c.height);
     var y = PAD + 42;
@@ -871,8 +989,8 @@
       g.strokeStyle = COL.line; g.lineWidth = 1;
       g.beginPath(); g.moveTo(PAD, y + 0.5); g.lineTo(W - PAD, y + 0.5); g.stroke();
     }
-    function wrap(t, size, color, lh){
-      font(size, '400'); g.fillStyle = color; g.textAlign = 'left';
+    function wrap(t, size, color, lh, weight){
+      font(size, weight || '400'); g.fillStyle = color; g.textAlign = 'left';
       var words = String(t).split(' '), ln = '';
       for(var i = 0; i < words.length; i++){
         var test = ln ? ln + ' ' + words[i] : words[i];
@@ -889,6 +1007,12 @@
       g.fillStyle = color; g.textAlign = 'left'; g.fillText(t, PAD + 17, y);
       y += 30;
     }
+    function row(left, right, color, size){
+      put(left, PAD, size || 27, '600', COL.dim);
+      put(right, W - PAD, size || 27, '700', color || '#fff', 'right');
+      y += 36;
+    }
+    function sub(t){ put(t, PAD + 16, 22, '400', COL.dim2); y += 32; }
 
     var d = new Date();
     put('Calculadolar', PAD, 42, '800', COL.bcv);
@@ -899,55 +1023,50 @@
     put('TASAS DEL DÍA', PAD, 20, '800', COL.dim); y += 40;
     KEYS.forEach(function(k){
       if(!ok(rate(k))) return;
-      put(LABEL[k] + (isManual(k) ? '  (a mano)' : ''), PAD, 27, '700', COL[k]);
-      put(fmt(rate(k)) + ' Bs', W - PAD, 27, '700', '#fff', 'right');
-      y += 38;
+      row(LABEL[k] + (isManual(k) ? '  (a mano)' : ''), fmt(rate(k)) + ' Bs', COL[k], 26);
     });
     y += 8; rule(); y += 44;
 
-    var R = {bcv:rate('bcv'), par:rate('par'), bin:rate('bin'), eur:rate('eur')};
-    var list = num($('price').value), desc = num($('disc').value), pay = num($('pay').value);
+    var R = {};
+    KEYS.forEach(function(k){ R[k] = rate(k); });
+    var list = num($('price').value), desc = num($('disc').value);
     if(!ok(desc) || desc < 0) desc = 0;
     var net = ok(list) ? list * (1 - desc / 100) : NaN;
-    var hasP = ok(net) && net > 0, hasQ = ok(pay) && pay > 0;
-
-    function row(left, right, color, size){
-      put(left, PAD, size || 27, '600', COL.dim);
-      put(right, W - PAD, size || 27, '700', color || '#fff', 'right');
-      y += 36;
+    var payBs = parseFloat($('verdict').dataset.paybs);
+    if(!ok(payBs)){
+      var pv = num($('pay').value);
+      payBs = (ok(pv) && curr() === 'Bs') ? pv : (ok(pv) && ok(R.bcv) ? pv * R.bcv : NaN);
     }
-    function sub(t){ put(t, PAD + 16, 22, '400', COL.dim2); y += 32; }
+    var hasP = ok(net) && net > 0, hasQ = ok(payBs) && payBs > 0;
 
     if(hasP && hasQ && ok(R.bcv)){
-      /* los dos precios, frente a frente */
       put('LOS DOS PRECIOS', PAD, 20, '800', COL.dim); y += 40;
-      row('Precio en $', '$ ' + fmt(net) + (desc > 0 ? '   (−' + fmt(desc, 1) + '%)' : ''), '#fff');
-      sub('= Bs ' + fmt(net * R.bcv) + ' a tasa BCV');
-      row('Pagando en ' + curr(), curr() + ' ' + fmt(pay), '#fff');
-      var costBs = (curr() === 'Bs') ? pay : pay * R.bcv;
-      sub('= $ ' + fmt(costBs / R.bcv) + ' a tasa BCV');
-      var listaBs = net * R.bcv, diff = costBs - listaBs;
+      row('Pagando en $', '$ ' + fmt(net) + (desc > 0 ? '   (−' + fmt(desc, 1) + '%)' : ''), '#fff');
+      sub('= Bs ' + fmtS(net * R.bcv) + ' a tasa BCV');
+      row('Pagando en Bs', 'Bs ' + fmt(payBs), '#fff');
+      sub('= $ ' + fmt(payBs / R.bcv) + ' a tasa BCV');
+      var listaBs = net * R.bcv, diff = payBs - listaBs;
       y += 4;
       row(Math.abs(diff) < 0.01 ? 'Sale igual' : (diff > 0 ? 'Pagas de más' : 'Pagas de menos'),
-          'Bs ' + fmt(Math.abs(diff)) + '   ' + pct(diff / listaBs * 100),
+          'Bs ' + fmtS(Math.abs(diff)) + '   ' + pct(diff / listaBs * 100),
           diff > 0.01 ? COL.bcv : COL.par);
       y += 8; rule(); y += 44;
     } else if(hasP){
       put('EL PRECIO', PAD, 20, '800', COL.dim); y += 40;
-      row('En dólares', '$ ' + fmt(net) + (desc > 0 ? '   (−' + fmt(desc, 1) + '%)' : ''), '#fff');
+      row('Pagando en $', '$ ' + fmt(net) + (desc > 0 ? '   (−' + fmt(desc, 1) + '%)' : ''), '#fff');
       y += 4;
       KEYS.forEach(function(k){
         if(!ok(R[k]) || R[k] <= 0) return;
-        row('a ' + LABEL[k], 'Bs ' + fmt(net * R[k]), COL[k], 25);
+        row('a ' + LABEL[k], 'Bs ' + fmtS(net * R[k]), COL[k], 25);
       });
       y += 8; rule(); y += 44;
     } else if(hasQ){
       put('EL MONTO', PAD, 20, '800', COL.dim); y += 40;
-      row('Pagando en ' + curr(), curr() + ' ' + fmt(pay), '#fff');
+      row('Pagando en Bs', 'Bs ' + fmt(payBs), '#fff');
       y += 4;
       KEYS.forEach(function(k){
         if(!ok(R[k]) || R[k] <= 0) return;
-        row('a ' + LABEL[k], (curr() === 'Bs') ? '$ ' + fmt(pay / R[k]) : 'Bs ' + fmt(pay * R[k]), COL[k], 25);
+        row('a ' + LABEL[k], '$ ' + fmt(payBs / R[k]), COL[k], 25);
       });
       y += 8; rule(); y += 44;
     }
@@ -968,6 +1087,14 @@
         t = t.replace(/\s+/g, ' ').trim();
         if(t) wrap(t, 23, COL.dim, 32);
       });
+      if($('verdict').dataset.advice){
+        y += 18;
+        var advTone = $('advice').classList.contains('bs') ? COL.par
+                    : $('advice').classList.contains('usd') ? COL.warn : COL.dim;
+        wrap($('verdict').dataset.advice, 30, advTone, 40, '800');
+        y += 4;
+        wrap($('verdict').dataset.adviceWhy, 21, COL.dim2, 30);
+      }
       y += 12; rule(); y += 34;
     }
 
@@ -989,8 +1116,6 @@
     return out;
   }
 
-  /* Ningún navegador puede escribir solo en el carrete: se abre la hoja de
-     compartir (ahí está "Guardar imagen") y si no existe, se descarga. */
   function shareReceipt(){
     var canvas, dataUrl;
     try{
@@ -1025,6 +1150,7 @@
     setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
     toast('Recibo guardado');
   }
+  $('btnShot').addEventListener('click', shareReceipt);
 
   /* ---------- fuera los gestos del navegador ---------- */
   ['gesturestart','gesturechange','gestureend'].forEach(function(ev){
@@ -1039,19 +1165,17 @@
     if(e.target && e.target.tagName === 'INPUT') return;
     e.preventDefault();
   });
-  /* dos dedos = nada; un dedo fuera de campo = nada de arrastrar la página */
   document.addEventListener('touchmove', function(e){
     if(e.touches && e.touches.length > 1) e.preventDefault();
   }, {passive:false});
 
-  /* instalada como app: el gesto de atrás no bota la sesión de una */
   var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   if(standalone && window.history && history.pushState){
     var lastBack = 0;
     history.pushState({cd:1}, '');
     window.addEventListener('popstate', function(){
       var now = Date.now();
-      if(now - lastBack < 2500) return;     // segunda vez seguida: lo dejamos salir
+      if(now - lastBack < 2500) return;
       lastBack = now;
       history.pushState({cd:1}, '');
       toast('Toca atrás otra vez para salir');
