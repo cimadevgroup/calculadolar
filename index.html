@@ -34,7 +34,10 @@
     overflow-x:hidden;
   }
   input{-webkit-user-select:text; user-select:text}
-  .app{max-width:480px; margin:0 auto; display:flex; flex-direction:column; gap:8px}
+  .app{max-width:480px; margin:0 auto; display:flex; flex-direction:column; gap:8px;
+        padding-bottom:calc(var(--pad-h, 320px) + 12px)}
+  /* esqueleto: lo que todavía no tiene dato ocupa su lugar, así nada salta */
+  .sk{display:block; height:7px; border-radius:4px; background:#232327; margin:3.7px 0}
 
   header{display:flex; align-items:center; gap:8px}
   h1{font-size:20px; font-weight:800; color:var(--bcv); margin:0; letter-spacing:-.4px}
@@ -45,7 +48,6 @@
   @keyframes spin{to{transform:rotate(360deg)}}
 
   .blk{transition:opacity .18s ease}
-  .blk.dim{opacity:.28}
   .lit-ring{
     border-color:rgba(255,196,102,.7) !important;
     box-shadow:0 0 0 1px rgba(255,196,102,.6), 0 0 14px rgba(255,176,60,.55), 0 0 34px rgba(255,159,10,.28);
@@ -96,12 +98,13 @@
   .hint{
     margin-top:5px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 5px;
     font-size:9px; color:var(--dim2); font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    line-height:1.6; min-height:60px;
+    line-height:1.6; height:74px; overflow:hidden; align-content:start;
   }
   .hint .row{display:flex; gap:3px; align-items:baseline; min-width:0}
   .hint .row span{flex:0 0 auto; opacity:.7}
   .hint .row b{flex:1; min-width:0; font-weight:700; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .hint .row.wide{grid-column:1 / -1}
+  .hint .row.vacio{visibility:hidden}
   .hint .row.net span,.hint .row.net b{color:var(--warn)}
   .hint .k-bcv span,.hint .k-bcv b{color:var(--bcv)}
   .hint .k-par span,.hint .k-par b{color:var(--par)}
@@ -120,7 +123,8 @@
   .verdict .val{font-size:25px; font-weight:800; line-height:1.1; font-variant-numeric:tabular-nums; letter-spacing:-.5px; white-space:nowrap}
   .verdict .val small{font-size:11px; font-weight:500; color:var(--dim)}
   .verdict .tag{font-size:9px; font-weight:800; text-transform:uppercase; padding:4px 7px; border-radius:7px; border:1px solid var(--line); color:var(--dim); margin-left:auto; text-align:center; max-width:48%; line-height:1.25}
-  .verdict .extra{margin-top:6px; font-size:9.5px; color:var(--dim2); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; line-height:1.5}
+  .verdict .vtop{height:42px}
+  .verdict .extra{margin-top:6px; font-size:9.5px; color:var(--dim2); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; line-height:1.5; height:29px; overflow:hidden}
   .verdict .extra b{color:#d1d1d6}
   .verdict .extra .up{color:var(--bcv)} .verdict .extra .down{color:var(--par)}
   .verdict.ok{border-style:solid; border-color:#30d15866}
@@ -132,12 +136,13 @@
   .verdict.eur .tag{color:var(--eur); background:#0a84ff26; border-color:#0a84ff88}
 
   /* ---- la conclusión: cómo te conviene pagar ---- */
-  .advice{display:none; margin-top:8px; border-radius:12px; padding:7px 9px; border:1px solid var(--line); background:#0d0d0f}
-  .advice.on{display:block}
-  .advice .head{display:flex; align-items:baseline; gap:6px; flex-wrap:wrap}
+  .advice{display:block; margin-top:8px; border-radius:12px; padding:7px 9px; border:1px solid var(--line); background:#0d0d0f; height:62px; overflow:hidden}
+  .advice.vacio{background:transparent}
+  .advice.vacio .big{flex:1}
+  .advice .head{display:flex; align-items:baseline; gap:6px; height:18px; overflow:hidden}
   .advice .big{font-size:14px; font-weight:800; letter-spacing:-.2px}
   .advice .save{font-size:11px; font-weight:700; font-variant-numeric:tabular-nums}
-  .advice .why{margin-top:3px; font-size:9px; color:var(--dim2); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; line-height:1.5}
+  .advice .why{margin-top:3px; font-size:9px; color:var(--dim2); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; line-height:1.5; height:27px; overflow:hidden}
   .advice.bs{border-color:#30d15877; background:#30d1580f}
   .advice.bs .big,.advice.bs .save{color:var(--par)}
   .advice.usd{border-color:#ffd60a77; background:#ffd60a0f}
@@ -145,10 +150,24 @@
   .advice.tie{border-color:var(--line)}
   .advice.tie .big{color:var(--dim)}
 
-  /* ---- teclado ---- */
-  .pad{background:var(--card2); border:1px solid var(--line); border-radius:18px; padding:9px; transition:box-shadow .18s ease}
-  .disp{display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--line); padding-bottom:5px; transition:opacity .18s ease; min-width:0}
-  .disp.off{opacity:.4}
+  /* ---- teclado: anclado abajo, como un teclado de verdad ----
+     lo que aparece o desaparece crece hacia arriba: las teclas nunca se mueven */
+  .pad{
+    position:fixed; left:50%; bottom:0; transform:translateX(-50%); z-index:8;
+    width:100%; max-width:480px; background:var(--card2);
+    border:1px solid var(--line); border-bottom:none; border-radius:18px 18px 0 0;
+    padding:8px 10px calc(10px + env(safe-area-inset-bottom));
+    box-shadow:0 -12px 30px rgba(0,0,0,.6); transition:box-shadow .18s ease;
+  }
+  .pad-head{display:flex; align-items:center; gap:8px; height:30px; margin-bottom:6px}
+  .pad-head .who{font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.3px; color:var(--dim2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
+  .pad-head .who b{color:var(--glow); font-weight:800}
+  .pad-head .modo{margin-left:auto; flex:0 0 auto; border:1px solid var(--line); background:#2c2c2e; color:var(--txt);
+    border-radius:9px; padding:6px 11px; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap}
+  .pad-head .modo:active{background:#3a3a3c}
+  .solo-calc{display:none}
+  .pad.modo-calc .solo-calc{display:block}
+  .disp{display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--line); padding-bottom:5px; min-width:0}
   .unit-btn{
     flex:0 0 auto; background:#3a3a3c; color:#fff; border:1px solid var(--line); border-radius:9px;
     padding:4px 9px; font-size:13px; font-weight:800; cursor:pointer; line-height:1.15; text-align:center;
@@ -161,24 +180,17 @@
     font-variant-numeric:tabular-nums; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
   }
   .expr::placeholder{font-family:-apple-system,sans-serif; font-size:11px; color:var(--dim2)}
-  .resline{display:flex; align-items:flex-end; gap:8px; min-width:0}
-  .resline .who{font-size:8.5px; font-weight:800; text-transform:uppercase; letter-spacing:.3px; color:var(--glow); white-space:nowrap; padding-bottom:9px; overflow:hidden; text-overflow:ellipsis; max-width:45%}
-  .resline .who.idle{color:var(--dim2)}
-  .res{flex:1; min-width:0; min-height:38px; display:flex; align-items:center; justify-content:flex-end; padding:2px 4px; font-size:30px; font-weight:300; font-variant-numeric:tabular-nums; letter-spacing:-1px; overflow:hidden; white-space:nowrap}
+  .resline{display:flex; align-items:flex-end; min-width:0}
+  .res{flex:1; min-width:0; height:40px; display:flex; align-items:center; justify-content:flex-end; padding:2px 4px; font-size:30px; font-weight:300; font-variant-numeric:tabular-nums; letter-spacing:-1px; overflow:hidden; white-space:nowrap}
   .res.err{color:var(--dim2); font-size:15px}
   .res u{font-size:13px; color:var(--dim); text-decoration:none; margin-right:5px; font-weight:600; letter-spacing:0}
-  .keyzone{border:1px solid transparent; border-radius:15px; padding:6px 5px 5px; margin:0 -5px -5px; transition:box-shadow .18s ease}
-  .keyzone.only-num .sendto,
-  .keyzone.only-num .chip,
-  .keyzone.only-num .key.op,
-  .keyzone.only-num .key.fn:not(.keep){opacity:.22; pointer-events:none}
-  .sendto,.chip,.key{transition:opacity .18s ease}
   .sendto{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-bottom:7px}
   .sendto button{border:1px solid var(--line); background:#2c2c2e; color:var(--dim); border-radius:9px; padding:6px 2px; font-size:9.5px; font-weight:700; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .sendto button:active{background:#3a3a3c; color:#fff}
   .chips{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px; margin-bottom:7px}
-  .chip{border:1px solid; background:transparent; border-radius:10px; padding:4px 1px; cursor:pointer; line-height:1.2; overflow:hidden; min-width:0}
-  .chip .main{display:block; font-size:9.5px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .chip{border:1px solid; background:transparent; border-radius:10px; padding:4px 1px; cursor:pointer; line-height:1.15; overflow:hidden; min-width:0; height:46px}
+  .chip .dir{display:block; font-size:8px; font-weight:600; opacity:.75; white-space:nowrap}
+  .chip .main{display:block; font-size:10.5px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .chip .rt{display:block; font-size:8px; font-weight:600; opacity:.8; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .chip:active{filter:brightness(1.7)}
   .c-bcv{color:var(--bcv); border-color:#ff453a55; background:#ff453a14}
@@ -190,14 +202,19 @@
   .c-ppl{color:var(--ppl); border-color:#7d8cff55; background:#7d8cff14}
   .c-prom{color:var(--prom); border-color:#c7c7cc55; background:#c7c7cc14}
   .keys{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px}
-  .key{height:44px; border:none; border-radius:12px; background:#3a3a3c; color:#fff; font-size:20px; font-weight:500; cursor:pointer; font-variant-numeric:tabular-nums}
+  .key{height:44px; border:none; border-radius:12px; background:#3a3a3c; color:#fff; font-size:20px; font-weight:500; cursor:pointer; font-variant-numeric:tabular-nums; transition:opacity .18s ease, box-shadow .18s ease}
   .key:active{filter:brightness(1.5)}
   .key.num{background:#48484a}
   .key.op{background:var(--op); font-weight:600}
   .key.fn{background:#5a5a5e; font-size:16px}
   .key.ac{background:#a5a5a5; color:#000; font-weight:700; font-size:16px}
+  /* escribiendo arriba: se encienden solo las teclas grises; las naranjas ahí no aplican */
+  .pad.modo-arriba .key.num, .pad.modo-arriba .key.fn, .pad.modo-arriba .key.ac{
+    box-shadow:0 0 0 1px rgba(255,196,102,.55), 0 0 10px rgba(255,176,60,.25);
+  }
+  .pad.modo-arriba .key.op{opacity:.22; pointer-events:none}
 
-  .toast{position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:#fff; color:#000; font-size:12px; font-weight:700; padding:8px 16px; border-radius:20px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:9; max-width:90vw; text-align:center}
+  .toast{position:fixed; left:50%; bottom:calc(var(--pad-h, 320px) + 10px); transform:translateX(-50%); background:#fff; color:#000; font-size:12px; font-weight:700; padding:8px 16px; border-radius:20px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:9; max-width:90vw; text-align:center}
   .toast.show{opacity:.95}
 </style>
 </head>
@@ -258,53 +275,53 @@
     </div>
   </section>
 
-  <section class="pad" id="pad">
-    <div class="disp" id="disp">
-      <button class="unit-btn" id="calcCur" type="button" data-cur="Bs" aria-label="Unidad del cálculo">
-        <small>unidad</small><span id="calcCurTxt">Bs</span>
-      </button>
-      <input class="expr" id="expr" type="text" inputmode="none" autocomplete="off" autocorrect="off"
-             spellcheck="false" placeholder="0">
-    </div>
-    <div class="resline">
-      <div class="who idle" id="resFor">Cálculo libre</div>
-      <div class="res" id="res">0</div>
+  <section class="pad modo-arriba" id="pad">
+    <div class="pad-head">
+      <div class="who" id="resFor">Escribiendo en <b>Precio pagando en $</b></div>
+      <button class="modo" id="btnModo" type="button">Calculadora ▴</button>
     </div>
 
-    <div class="keyzone" id="keyzone">
+    <div class="solo-calc">
+      <div class="disp" id="disp">
+        <button class="unit-btn" id="calcCur" type="button" data-cur="Bs" aria-label="Unidad del cálculo">
+          <small>unidad</small><span id="calcCurTxt">Bs</span>
+        </button>
+        <input class="expr" id="expr" type="text" inputmode="none" autocomplete="off" autocorrect="off"
+               spellcheck="false" placeholder="0">
+      </div>
+      <div class="resline"><div class="res" id="res">0</div></div>
       <div class="sendto">
         <button id="toPrice" type="button">↑ Al precio en $</button>
         <button id="toPay" type="button">↑ A pagando en Bs</button>
       </div>
-
       <div class="chips" id="chips"></div>
+    </div>
 
-      <div class="keys">
-        <button class="key ac" id="kClear" type="button">AC</button>
-        <button class="key fn" data-ins="(" type="button">(</button>
-        <button class="key fn" data-ins=")" type="button">)</button>
-        <button class="key op" data-ins="/" type="button">÷</button>
+    <div class="keys" id="keys">
+      <button class="key ac" id="kClear" type="button">AC</button>
+      <button class="key fn" data-ins="(" type="button">(</button>
+      <button class="key fn" data-ins=")" type="button">)</button>
+      <button class="key op" data-ins="/" type="button">÷</button>
 
-        <button class="key num" data-ins="7" type="button">7</button>
-        <button class="key num" data-ins="8" type="button">8</button>
-        <button class="key num" data-ins="9" type="button">9</button>
-        <button class="key op" data-ins="*" type="button">×</button>
+      <button class="key num" data-ins="7" type="button">7</button>
+      <button class="key num" data-ins="8" type="button">8</button>
+      <button class="key num" data-ins="9" type="button">9</button>
+      <button class="key op" data-ins="*" type="button">×</button>
 
-        <button class="key num" data-ins="4" type="button">4</button>
-        <button class="key num" data-ins="5" type="button">5</button>
-        <button class="key num" data-ins="6" type="button">6</button>
-        <button class="key op" data-ins="-" type="button">−</button>
+      <button class="key num" data-ins="4" type="button">4</button>
+      <button class="key num" data-ins="5" type="button">5</button>
+      <button class="key num" data-ins="6" type="button">6</button>
+      <button class="key op" data-ins="-" type="button">−</button>
 
-        <button class="key num" data-ins="1" type="button">1</button>
-        <button class="key num" data-ins="2" type="button">2</button>
-        <button class="key num" data-ins="3" type="button">3</button>
-        <button class="key op" data-ins="+" type="button">+</button>
+      <button class="key num" data-ins="1" type="button">1</button>
+      <button class="key num" data-ins="2" type="button">2</button>
+      <button class="key num" data-ins="3" type="button">3</button>
+      <button class="key op" data-ins="+" type="button">+</button>
 
-        <button class="key num" data-ins="0" type="button">0</button>
-        <button class="key num" id="kDec" data-ins="," type="button">,</button>
-        <button class="key fn keep" id="kDel" type="button">⌫</button>
-        <button class="key op" id="kEq" type="button">=</button>
-      </div>
+      <button class="key num" data-ins="0" type="button">0</button>
+      <button class="key num" id="kDec" data-ins="," type="button">,</button>
+      <button class="key fn" id="kDel" type="button">⌫</button>
+      <button class="key op" id="kEq" type="button">=</button>
     </div>
   </section>
 </div>
@@ -329,7 +346,7 @@
   var LABEL = {bcv:'BCV', par:'Paralelo', bin:'Binance', byb:'Bybit', eur:'Euro BCV', zel:'Zelle', ppl:'PayPal', prom:'Promedio'};
   var TAB   = {bcv:'BCV', par:'PARALELO', bin:'BINANCE', byb:'BYBIT', eur:'EURO BCV', zel:'ZELLE ✎', ppl:'PAYPAL ✎', prom:'PROMEDIO'};
   var SHORT = {bcv:'BCV', par:'PAR', bin:'BIN', byb:'BYB', eur:'EUR', zel:'ZEL', ppl:'PPL', prom:'PRO'};
-  var CHIP  = {bcv:'a $ BCV', par:'a $ Paral.', bin:'a $ Binance', byb:'a $ Bybit', eur:'a € BCV', zel:'a $ Zelle', ppl:'a $ PayPal', prom:'a $ Prom.'};
+  var CHIP  = {bcv:'BCV', par:'Paralelo', bin:'Binance', byb:'Bybit', eur:'Euro BCV', zel:'Zelle', ppl:'PayPal', prom:'Promedio'};
 
   var api = {fetchedAt:null, stale:false};
   KEYS.forEach(function(k){ api[k] = null; });
@@ -444,6 +461,7 @@
     $('rates').innerHTML = rows;
     $('chips').innerHTML = KEYS.map(function(k){
       return '<button class="chip c-' + k + '" data-rate="' + k + '" type="button">' +
+               '<span class="dir">Bs a tasa</span>' +
                '<span class="main">' + CHIP[k] + '</span>' +
                '<span class="rt" id="chip-' + k + '">—</span>' +
              '</button>';
@@ -454,8 +472,8 @@
   var FIELDS = KEYS.concat(['price','disc','pay','expr']);
   function fieldName(el){
     if(!el) return 'Cálculo libre';
-    if(el.id === 'pay') return 'Pagando en Bs';
-    if(el.id === 'price') return 'Precio en $';
+    if(el.id === 'pay') return 'Precio pagando en Bs';
+    if(el.id === 'price') return 'Precio pagando en $';
     if(el.id === 'disc') return 'Descuento %';
     if(el.id === 'expr') return 'Cálculo libre';
     return 'Tasa ' + LABEL[el.id];
@@ -466,30 +484,45 @@
     if(!el || el.id === 'expr') return (calcCur() === '$') ? '.' : ',';
     return ',';
   }
-  function target(){ return active || $('expr'); }
+  function target(){ return active || $('price'); }
 
+  /* Siempre hay un campo activo. Si es uno de arriba, el teclado solo enciende
+     las teclas grises; si es la calculadora, se abre la calculadora entera.
+     Ya no se apaga el resto de la pantalla: la conclusión tiene que verse siempre. */
+  var ultimoArriba = null;
   function setActive(el){
-    active = el || null;
-    document.querySelectorAll('.blk').forEach(function(b){
-      b.classList.toggle('dim', !!active && !b.contains(active));
-    });
-    $('fld-price').classList.toggle('lit-ring', !!active && (active.id === 'price' || active.id === 'disc'));
-    $('fld-pay').classList.toggle('lit-ring', !!active && active.id === 'pay');
+    active = el || $('price');
+    var enCalc = active.id === 'expr';
+    if(!enCalc) ultimoArriba = active;
+    $('fld-price').classList.toggle('lit-ring', active.id === 'price' || active.id === 'disc');
+    $('fld-pay').classList.toggle('lit-ring', active.id === 'pay');
     KEYS.forEach(function(k){
-      $('wrap-' + k).classList.toggle('lit-ring', !!active && active.id === k);
+      $('wrap-' + k).classList.toggle('lit-ring', active.id === k);
     });
-    var onCalc = !!active && active.id === 'expr';
-    $('pad').classList.toggle('lit-ring', onCalc);
-    $('keyzone').classList.toggle('lit-ring', !!active && !onCalc);
-    $('keyzone').classList.toggle('only-num', !!active && !onCalc);
-    $('disp').classList.toggle('off', !!active && !onCalc);
-    var who = $('resFor');
-    who.textContent = fieldName(active);
-    who.classList.toggle('idle', !active);
+    var pad = $('pad');
+    pad.classList.toggle('modo-calc', enCalc);
+    pad.classList.toggle('modo-arriba', !enCalc);
+    pad.classList.toggle('lit-ring', enCalc);
+    $('resFor').innerHTML = enCalc ? '<b>Calculadora</b>'
+      : 'Escribiendo en <b>' + fieldName(active) + '</b>';
+    $('btnModo').textContent = enCalc ? '▾ Volver arriba' : 'Calculadora ▴';
     var dk = $('kDec');
     dk.dataset.ins = decFor(active);
     dk.textContent = dk.dataset.ins;
     showResult();
+    medirPad();
+  }
+
+  /* el alto del teclado fijo, para que el contenido de arriba nunca quede debajo */
+  function medirPad(){
+    var h = $('pad').getBoundingClientRect().height;
+    document.documentElement.style.setProperty('--pad-h', Math.ceil(h) + 'px');
+  }
+  window.addEventListener('resize', medirPad);
+
+  function pintarChips(){
+    var dir = (calcCur() === '$') ? 'Bs a tasa' : '$ a tasa';
+    document.querySelectorAll('.chip .dir').forEach(function(d){ d.textContent = dir; });
   }
 
   /* ---------- pintar ---------- */
@@ -593,6 +626,15 @@
     }).join('');
   }
 
+  function conclusionVacia(){
+    $('advice').className = 'advice vacio';
+    $('adviceBig').innerHTML = '<i class="sk" style="width:55%; margin:5px 0"></i>';
+    $('adviceSave').textContent = '';
+    $('adviceWhy').innerHTML = '<i class="sk" style="width:94%"></i><i class="sk" style="width:68%"></i>';
+    $('verdict').dataset.advice = '';
+    $('verdict').dataset.adviceWhy = '';
+  }
+
   function compute(){
     var R = {};
     KEYS.forEach(function(k){ R[k] = rate(k); });
@@ -607,32 +649,34 @@
        si lo estás viendo en $, se pasa a Bs con el BCV, que es como lo cotizan */
     var payBs = ok(pay) ? (cur === 'Bs' ? pay : (ok(R.bcv) ? pay * R.bcv : NaN)) : NaN;
 
+    /* los dos desgloses miden siempre lo mismo: una fila arriba (el neto, o su
+       hueco) y ocho tasas; sin dato, esqueleto en su lugar */
+    var hueco = '<div class="row net wide vacio"><span>—</span><b>—</b></div>';
+    var esqueleto = KEYS.map(function(){ return '<div class="row"><i class="sk" style="width:86%"></i></div>'; }).join('');
+
     var hp = $('hintPrice');
     if(ok(net) && net > 0){
       var head = desc > 0
         ? '<div class="row net wide"><span>NETO</span><b>$ ' + fmt(net) + ' (−' + fmt(desc, 1) + '%)</b></div>'
-        : '';
+        : hueco;
       hp.innerHTML = head + rows(KEYS.map(function(k){
         return {k:k, name:SHORT[k], value:(ok(R[k]) && R[k] > 0) ? fmtS(net * R[k]) : '—'};
       }));
     } else {
-      hp.innerHTML = '<div class="empty">Ingresa el precio…</div>';
+      hp.innerHTML = hueco + esqueleto;
     }
 
     var hq = $('hintPay');
     if(ok(payBs) && payBs > 0){
-      hq.innerHTML = rows(KEYS.map(function(k){
+      hq.innerHTML = hueco + rows(KEYS.map(function(k){
         return {k:k, name:SHORT[k], value:(ok(R[k]) && R[k] > 0) ? '$' + fmt(payBs / R[k]) : '—'};
       }));
-    } else if(ok(pay) && pay > 0){
-      hq.innerHTML = '<div class="empty">Falta la tasa BCV…</div>';
     } else {
-      hq.innerHTML = '<div class="empty">Ingresa el monto…</div>';
+      hq.innerHTML = hueco + esqueleto;
     }
 
     var box = $('verdict');
-    var dimmed = box.classList.contains('dim');
-    box.className = 'verdict blk' + (dimmed ? ' dim' : '');
+    box.className = 'verdict blk';
     var extra = $('impExtra');
     var adv = $('advice');
     var usable = ok(net) && net > 0 && ok(payBs) && payBs > 0 && ok(R.bcv) && R.bcv > 0;
@@ -640,8 +684,8 @@
     if(!usable){
       $('impRate').innerHTML = '--,--<small> Bs/$</small>';
       $('impTag').textContent = 'Esperando';
-      extra.innerHTML = '';
-      adv.className = 'advice';
+      extra.innerHTML = '<i class="sk" style="width:58%"></i>';
+      conclusionVacia();
       box.dataset.imp = '';
       box.dataset.tag = '';
       box.dataset.advice = '';
@@ -684,9 +728,6 @@
       else if(real <= -0.05) line += ' pero pagas <b class="up">' + fmt(-real, 1) + ' % de más</b>';
       else line += ' y el real es <b>0 %</b>';
     }
-    if(match === 'eur'){
-      line += '<br>El euro no es tasa de pago: son ' + pct(over) + ' de más disfrazados de “oficial”.';
-    }
     extra.innerHTML = line;
 
     /* ---- cómo te conviene pagar ----
@@ -714,16 +755,14 @@
         save = '';
         why = 'Los dos precios salen casi iguales midiendo tu dólar a ' + LABEL[refK] + ' (' + fmt(refV) + ').';
       }
-      adv.className = 'advice on ' + cls;
+      adv.className = 'advice ' + cls;
       $('adviceBig').textContent = big;
       $('adviceSave').textContent = save;
       $('adviceWhy').textContent = why;
       box.dataset.advice = big + (save ? ' · ' + save : '');
       box.dataset.adviceWhy = why;
     } else {
-      adv.className = 'advice';
-      box.dataset.advice = '';
-      box.dataset.adviceWhy = '';
+      conclusionVacia();
     }
 
     box.dataset.imp = imp;
@@ -761,8 +800,9 @@
   function insert(text){
     var el = target();
     if(el !== active) setActive(el);
-    var start = (el.selectionStart === null) ? el.value.length : el.selectionStart;
-    var end = (el.selectionEnd === null) ? el.value.length : el.selectionEnd;
+    var foco = (document.activeElement === el);
+    var start = (!foco || el.selectionStart === null) ? el.value.length : el.selectionStart;
+    var end = (!foco || el.selectionEnd === null) ? el.value.length : el.selectionEnd;
     el.value = el.value.slice(0, start) + text + el.value.slice(end);
     var pos = start + text.length;
     try{ el.setSelectionRange(pos, pos); }catch(e){}
@@ -771,7 +811,9 @@
   function backspace(){
     var el = target();
     if(el !== active) setActive(el);
-    var start = el.selectionStart, end = el.selectionEnd;
+    var foco = (document.activeElement === el);
+    var start = foco ? el.selectionStart : el.value.length;
+    var end = foco ? el.selectionEnd : el.value.length;
     if(start === end){
       if(start === 0) return;
       el.value = el.value.slice(0, start - 1) + el.value.slice(end);
@@ -844,8 +886,6 @@
       if(t !== inp){ e.preventDefault(); inp.focus(); setActive(inp); }
       return;
     }
-    if(t.tagName === 'INPUT') return;
-    if(active){ active.blur(); setActive(null); }
   }, true);
 
   /* el botón del campo derecho NO cambia el precio: lo muestra en la otra moneda */
@@ -868,7 +908,12 @@
     $('calcCur').dataset.cur = u;
     $('calcCurTxt').textContent = u;
     $('toPay').textContent = '↑ A pagando en ' + u;
+    pintarChips();
   }
+  press($('btnModo'), function(){
+    if(active && active.id === 'expr') setActive(ultimoArriba || $('price'));
+    else setActive($('expr'));
+  });
   press($('calcCur'), function(){
     setCalcCur(calcCur() === 'Bs' ? '$' : 'Bs');
     setActive(active);
@@ -1185,7 +1230,9 @@
   /* ---------- arranque ---------- */
   loadCache();
   try{ paint(); }catch(e){ console.error(e); }
-  setActive(null);
+  pintarChips();
+  setActive($('price'));
+  requestAnimationFrame(medirPad);
   fetchRates();
 
   if('serviceWorker' in navigator){
