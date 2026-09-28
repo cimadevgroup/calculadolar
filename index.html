@@ -201,18 +201,21 @@
   .c-zel{color:var(--zel); border-color:#bf5af255; background:#bf5af214}
   .c-ppl{color:var(--ppl); border-color:#7d8cff55; background:#7d8cff14}
   .c-prom{color:var(--prom); border-color:#c7c7cc55; background:#c7c7cc14}
-  .keys{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px}
+  /* el mismo teclado con dos distribuciones: calculadora (4 columnas) y numérico (3) */
+  .keys{display:grid; gap:6px; grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-areas:"ac pa pc div" "k7 k8 k9 mul" "k4 k5 k6 res" "k1 k2 k3 sum" "k0 dec del eq"}
+  .pad.modo-arriba .keys{grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-areas:"ac ac del" "k7 k8 k9" "k4 k5 k6" "k1 k2 k3" "k0 k0 dec"}
   .key{height:44px; border:none; border-radius:12px; background:#3a3a3c; color:#fff; font-size:20px; font-weight:500; cursor:pointer; font-variant-numeric:tabular-nums; transition:opacity .18s ease, box-shadow .18s ease}
   .key:active{filter:brightness(1.5)}
   .key.num{background:#48484a}
   .key.op{background:var(--op); font-weight:600}
   .key.fn{background:#5a5a5e; font-size:16px}
   .key.ac{background:#a5a5a5; color:#000; font-weight:700; font-size:16px}
-  /* escribiendo arriba: se encienden solo las teclas grises; las naranjas ahí no aplican */
-  .pad.modo-arriba .key.num, .pad.modo-arriba .key.fn, .pad.modo-arriba .key.ac{
-    box-shadow:0 0 0 1px rgba(255,196,102,.55), 0 0 10px rgba(255,176,60,.25);
-  }
-  .pad.modo-arriba .key.op{opacity:.22; pointer-events:none}
+  /* escribiendo arriba: teclado numérico. Solo números, decimal, borrar y AC;
+     operaciones y paréntesis no existen ahí */
+  .pad.modo-arriba .key.op, .pad.modo-arriba .key.par{display:none}
+  .pad.modo-arriba .key{box-shadow:0 0 0 1px rgba(255,196,102,.55), 0 0 10px rgba(255,176,60,.25)}
 
   .toast{position:fixed; left:50%; bottom:calc(var(--pad-h, 320px) + 10px); transform:translateX(-50%); background:#fff; color:#000; font-size:12px; font-weight:700; padding:8px 16px; border-radius:20px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:9; max-width:90vw; text-align:center}
   .toast.show{opacity:.95}
@@ -298,30 +301,30 @@
     </div>
 
     <div class="keys" id="keys">
-      <button class="key ac" id="kClear" type="button">AC</button>
-      <button class="key fn" data-ins="(" type="button">(</button>
-      <button class="key fn" data-ins=")" type="button">)</button>
-      <button class="key op" data-ins="/" type="button">÷</button>
+      <button class="key ac" id="kClear" type="button" style="grid-area:ac">AC</button>
+      <button class="key fn par" data-ins="(" type="button" style="grid-area:pa">(</button>
+      <button class="key fn par" data-ins=")" type="button" style="grid-area:pc">)</button>
+      <button class="key op" data-ins="/" type="button" style="grid-area:div">÷</button>
 
-      <button class="key num" data-ins="7" type="button">7</button>
-      <button class="key num" data-ins="8" type="button">8</button>
-      <button class="key num" data-ins="9" type="button">9</button>
-      <button class="key op" data-ins="*" type="button">×</button>
+      <button class="key num" data-ins="7" type="button" style="grid-area:k7">7</button>
+      <button class="key num" data-ins="8" type="button" style="grid-area:k8">8</button>
+      <button class="key num" data-ins="9" type="button" style="grid-area:k9">9</button>
+      <button class="key op" data-ins="*" type="button" style="grid-area:mul">×</button>
 
-      <button class="key num" data-ins="4" type="button">4</button>
-      <button class="key num" data-ins="5" type="button">5</button>
-      <button class="key num" data-ins="6" type="button">6</button>
-      <button class="key op" data-ins="-" type="button">−</button>
+      <button class="key num" data-ins="4" type="button" style="grid-area:k4">4</button>
+      <button class="key num" data-ins="5" type="button" style="grid-area:k5">5</button>
+      <button class="key num" data-ins="6" type="button" style="grid-area:k6">6</button>
+      <button class="key op" data-ins="-" type="button" style="grid-area:res">−</button>
 
-      <button class="key num" data-ins="1" type="button">1</button>
-      <button class="key num" data-ins="2" type="button">2</button>
-      <button class="key num" data-ins="3" type="button">3</button>
-      <button class="key op" data-ins="+" type="button">+</button>
+      <button class="key num" data-ins="1" type="button" style="grid-area:k1">1</button>
+      <button class="key num" data-ins="2" type="button" style="grid-area:k2">2</button>
+      <button class="key num" data-ins="3" type="button" style="grid-area:k3">3</button>
+      <button class="key op" data-ins="+" type="button" style="grid-area:sum">+</button>
 
-      <button class="key num" data-ins="0" type="button">0</button>
-      <button class="key num" id="kDec" data-ins="," type="button">,</button>
-      <button class="key fn" id="kDel" type="button">⌫</button>
-      <button class="key op" id="kEq" type="button">=</button>
+      <button class="key num" data-ins="0" type="button" style="grid-area:k0">0</button>
+      <button class="key num" id="kDec" data-ins="," type="button" style="grid-area:dec">,</button>
+      <button class="key fn" id="kDel" type="button" style="grid-area:del">⌫</button>
+      <button class="key op" id="kEq" type="button" style="grid-area:eq">=</button>
     </div>
   </section>
 </div>
