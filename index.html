@@ -201,20 +201,17 @@
   .c-zel{color:var(--zel); border-color:#bf5af255; background:#bf5af214}
   .c-ppl{color:var(--ppl); border-color:#7d8cff55; background:#7d8cff14}
   .c-prom{color:var(--prom); border-color:#c7c7cc55; background:#c7c7cc14}
-  /* el mismo teclado con dos distribuciones: calculadora (4 columnas) y numérico (3) */
   .keys{display:grid; gap:6px; grid-template-columns:repeat(4,minmax(0,1fr));
     grid-template-areas:"ac pa pc div" "k7 k8 k9 mul" "k4 k5 k6 res" "k1 k2 k3 sum" "k0 dec del eq"}
-  .pad.modo-arriba .keys{grid-template-columns:repeat(3,minmax(0,1fr));
-    grid-template-areas:"ac ac del" "k7 k8 k9" "k4 k5 k6" "k1 k2 k3" "k0 k0 dec"}
   .key{height:44px; border:none; border-radius:12px; background:#3a3a3c; color:#fff; font-size:20px; font-weight:500; cursor:pointer; font-variant-numeric:tabular-nums; transition:opacity .18s ease, box-shadow .18s ease}
   .key:active{filter:brightness(1.5)}
   .key.num{background:#48484a}
   .key.op{background:var(--op); font-weight:600}
   .key.fn{background:#5a5a5e; font-size:16px}
   .key.ac{background:#a5a5a5; color:#000; font-weight:700; font-size:16px}
-  /* escribiendo arriba: teclado numérico. Solo números, decimal, borrar y AC;
-     operaciones y paréntesis no existen ahí */
-  .pad.modo-arriba .key.op, .pad.modo-arriba .key.par{display:none}
+  /* escribiendo arriba: es el MISMO teclado, cada tecla en su sitio. Se apaga todo
+     menos AC, números, decimal y borrar: desaparecen y dejan su hueco, nada se mueve */
+  .pad.modo-arriba .key.op, .pad.modo-arriba .key.par{visibility:hidden; pointer-events:none}
   .pad.modo-arriba .key{box-shadow:0 0 0 1px rgba(255,196,102,.55), 0 0 10px rgba(255,176,60,.25)}
 
   .toast{position:fixed; left:50%; bottom:calc(var(--pad-h, 320px) + 10px); transform:translateX(-50%); background:#fff; color:#000; font-size:12px; font-weight:700; padding:8px 16px; border-radius:20px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:9; max-width:90vw; text-align:center}
