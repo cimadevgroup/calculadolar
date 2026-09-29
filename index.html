@@ -216,6 +216,16 @@
   /* escribiendo arriba: es el MISMO teclado, cada tecla en su sitio. Se apaga todo
      menos AC, números, decimal y borrar: desaparecen y dejan su hueco, nada se mueve */
   .pad.modo-arriba .key.op, .pad.modo-arriba .key.par{visibility:hidden; pointer-events:none}
+  /* en un monto tipo banco el decimal lo pone la app: la tecla no aplica */
+  .pad.modo-arriba.banco #kDec{visibility:hidden; pointer-events:none}
+
+  /* con la calculadora abierta, lo de arriba se apaga: los campos apenas se ven
+     y el resto desaparece */
+  header, .rates, .hint, .verdict, .cols .field, .cols .field-label{transition:opacity .2s ease}
+  body.calc-abierta header, body.calc-abierta .rates,
+  body.calc-abierta .hint, body.calc-abierta .verdict{opacity:0; pointer-events:none}
+  body.calc-abierta .cols .field-label{opacity:.12}
+  body.calc-abierta .cols .field{opacity:.18}
   .pad.modo-arriba .key{box-shadow:0 0 0 1px rgba(255,196,102,.75), 0 0 5px rgba(255,176,60,.35)}
 
   .toast{position:fixed; left:50%; bottom:calc(var(--pad-h, 320px) + 10px); transform:translateX(-50%); background:#fff; color:#000; font-size:12px; font-weight:700; padding:8px 16px; border-radius:20px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:9; max-width:90vw; text-align:center}
@@ -245,7 +255,7 @@
     <div class="blk" id="blk-price">
       <p class="field-label">Precio pagando en $</p>
       <div class="field" id="fld-price">
-        <input id="price" type="text" inputmode="none" autocomplete="off" placeholder="0" aria-label="Precio pagando en dólares">
+        <input id="price" type="text" inputmode="none" autocomplete="off" placeholder="0.00" data-banco="1" aria-label="Precio pagando en dólares">
         <div class="sep"></div>
         <input id="disc" class="disc" type="text" inputmode="none" autocomplete="off" placeholder="0" aria-label="Descuento por ciento">
         <div class="pct">% desc</div>
@@ -258,7 +268,7 @@
         <button class="cur-btn" id="cur" type="button" data-cur="Bs" aria-label="Mostrar ese precio en bolívares o en dólares">
           <small>mostrar en</small><b id="curTxt">Bs</b>
         </button>
-        <input id="pay" type="text" inputmode="none" autocomplete="off" placeholder="0" aria-label="Precio pagando en bolívares">
+        <input id="pay" type="text" inputmode="none" autocomplete="off" placeholder="0,00" data-banco="1" aria-label="Precio pagando en bolívares">
       </div>
       <div class="hint" id="hintPay"><div class="empty">Ingresa el monto…</div></div>
     </div>
@@ -340,7 +350,8 @@
   var API_EUR = 'https://ve.dolarapi.com/v1/euros';
   var API_P2P = 'https://criptoya.com/api/usdt/ves/1';
   var CACHE_KEY = 'calculadolar.rates';
-  var MANUAL_KEY = 'calculadolar.manual';
+  var MANUAL_KEY = 'calculadolar.manual';            // formato viejo: el texto del campo
+  var MANUAL_KEY2 = 'calculadolar.manual.cents';     // formato nuevo: céntimos
 
   /* las ocho tasas */
   var KEYS   = ['bcv','par','bin','byb','eur','zel','ppl','prom'];
@@ -389,8 +400,38 @@
     return String(parseFloat(n.toFixed(6))).replace('.', sep || ',');
   }
 
+  /* ---------- montos tipo banco ----------
+     Se escriben como en el banco: cada dígito entra por los céntimos y empuja a los
+     demás a la izquierda (1 → 0,01 · 12 → 0,12 · 123 → 1,23 · 1234 → 12,34).
+     El valor vive en céntimos (data-cents); lo que se ve en el campo es su formato. */
+  function esBanco(el){ return !!(el && el.dataset && el.dataset.banco === '1'); }
+  function unidadDe(el){
+    if(el.id === 'price') return '$';
+    if(el.id === 'pay') return curr();
+    return 'Bs';                                   // las tasas son bolívares por dólar
+  }
+  function centavos(el){
+    var c = el.dataset.cents;
+    return (c === undefined || c === '') ? NaN : parseInt(c, 10);
+  }
+  function pintarBanco(el){
+    var c = centavos(el);
+    el.value = isNaN(c) ? '' : fmtU(c / 100, unidadDe(el));
+  }
+  function ponerMonto(el, n){
+    el.dataset.cents = ok(n) ? String(Math.round(n * 100)) : '';
+    pintarBanco(el);
+  }
+  function valorDe(el){
+    if(esBanco(el)){ var c = centavos(el); return isNaN(c) ? NaN : c / 100; }
+    return num(el.value);
+  }
+  function alFinal(el){
+    try{ if(document.activeElement === el) el.setSelectionRange(el.value.length, el.value.length); }catch(e){}
+  }
+
   function typed(k){
-    var v = num($(k).value);
+    var v = valorDe($(k));
     return (ok(v) && v > 0) ? v : NaN;
   }
   function isManual(k){ return ok(typed(k)); }
@@ -459,7 +500,7 @@
     var rows = KEYS.map(function(k){
       return '<div class="rate r-' + k + ' blk" id="wrap-' + k + '">' +
                '<label for="' + k + '">' + TAB[k] + '</label>' +
-               '<input id="' + k + '" type="text" inputmode="none" autocomplete="off" placeholder="—" aria-label="Tasa ' + LABEL[k] + '">' +
+               '<input id="' + k + '" type="text" inputmode="none" autocomplete="off" placeholder="—" data-banco="1" aria-label="Tasa ' + LABEL[k] + '">' +
              '</div>';
     }).join('');
     $('rates').innerHTML = rows;
@@ -507,7 +548,13 @@
     pad.classList.toggle('modo-calc', enCalc);
     pad.classList.toggle('modo-arriba', !enCalc);
     pad.classList.toggle('lit-ring', enCalc);
+    pad.classList.toggle('banco', esBanco(active));
+    document.body.classList.toggle('calc-abierta', enCalc);
     if(enCalc) window.scrollTo(0, 0);
+    /* el cursor va donde se está escribiendo: al abrir la calculadora sale de los
+       campos de arriba, y al volver regresa al campo */
+    if(document.activeElement !== active){ try{ active.focus({preventScroll:true}); }catch(e){} }
+    alFinal(active);
     $('resFor').innerHTML = enCalc ? '<b>Calculadora</b>'
       : 'Escribiendo en <b>' + fieldName(active) + '</b>';
     $('btnModo').textContent = enCalc ? '▾ Volver arriba' : 'Calculadora ▴';
@@ -567,8 +614,15 @@
         api.fetchedAt = c.fetchedAt || null;
         api.stale = true;
       }
-      var m = JSON.parse(localStorage.getItem(MANUAL_KEY) || 'null');
-      if(m) MANUAL.forEach(function(k){ if(m[k]) $(k).value = m[k]; });
+      var m2 = JSON.parse(localStorage.getItem(MANUAL_KEY2) || 'null');
+      if(m2){
+        MANUAL.forEach(function(k){
+          if(m2[k] !== undefined && m2[k] !== ''){ $(k).dataset.cents = String(m2[k]); pintarBanco($(k)); }
+        });
+      } else {
+        var m = JSON.parse(localStorage.getItem(MANUAL_KEY) || 'null');
+        if(m) MANUAL.forEach(function(k){ var v = num(m[k]); if(ok(v) && v > 0) ponerMonto($(k), v); });
+      }
     }catch(e){}
   }
   function saveCache(){
@@ -581,8 +635,8 @@
   function saveManual(){
     try{
       var o = {};
-      MANUAL.forEach(function(k){ o[k] = $(k).value; });
-      localStorage.setItem(MANUAL_KEY, JSON.stringify(o));
+      MANUAL.forEach(function(k){ o[k] = $(k).dataset.cents || ''; });
+      localStorage.setItem(MANUAL_KEY2, JSON.stringify(o));
     }catch(e){}
   }
 
@@ -615,8 +669,8 @@
   function fetchRates(){
     var btn = $('btnRefresh');
     btn.classList.add('spin');
-    AUTO.forEach(function(k){ $(k).value = ''; });   // las de a mano NO se borran
-    $('prom').value = '';
+    AUTO.forEach(function(k){ ponerMonto($(k), NaN); });   // las de a mano NO se borran
+    ponerMonto($('prom'), NaN);
     return Promise.all([getJSON(API_USD), getJSON(API_EUR), getJSON(API_P2P)]).then(function(res){
       var got = 0;
       var v = {
@@ -652,12 +706,12 @@
   function compute(){
     var R = {};
     KEYS.forEach(function(k){ R[k] = rate(k); });
-    var list = num($('price').value);
+    var list = valorDe($('price'));
     var desc = num($('disc').value);
     if(!ok(desc) || desc < 0) desc = 0;
     if(desc > 99.9) desc = 99.9;
     var net = ok(list) ? list * (1 - desc / 100) : NaN;
-    var pay = num($('pay').value);
+    var pay = valorDe($('pay'));
     var cur = curr();
     /* el campo derecho SIEMPRE es el precio pagando en bolívares;
        si lo estás viendo en $, se pasa a Bs con el BCV, que es como lo cotizan */
@@ -817,6 +871,14 @@
   function insert(text){
     var el = target();
     if(el !== active) setActive(el);
+    if(esBanco(el)){
+      if(!/^[0-9]$/.test(text)) return;            // en un monto solo entran dígitos
+      var c = centavos(el); if(isNaN(c)) c = 0;
+      if(String(c).length >= 13) return;
+      el.dataset.cents = String(c * 10 + parseInt(text, 10));
+      pintarBanco(el); alFinal(el); afterEdit();
+      return;
+    }
     var foco = (document.activeElement === el);
     var start = (!foco || el.selectionStart === null) ? el.value.length : el.selectionStart;
     var end = (!foco || el.selectionEnd === null) ? el.value.length : el.selectionEnd;
@@ -828,6 +890,13 @@
   function backspace(){
     var el = target();
     if(el !== active) setActive(el);
+    if(esBanco(el)){
+      var c = centavos(el);
+      if(isNaN(c)) return;
+      el.dataset.cents = (c < 10) ? '' : String(Math.floor(c / 10));
+      pintarBanco(el); alFinal(el); afterEdit();
+      return;
+    }
     var foco = (document.activeElement === el);
     var start = foco ? el.selectionStart : el.value.length;
     var end = foco ? el.selectionEnd : el.value.length;
@@ -844,12 +913,14 @@
   function clearField(){
     var el = target();
     if(el !== active) setActive(el);
+    if(esBanco(el)){ ponerMonto(el, NaN); afterEdit(); return; }
     el.value = '';
     try{ el.setSelectionRange(0, 0); }catch(e){}
     afterEdit();
   }
   function equals(){
     var el = target();
+    if(esBanco(el)) return;
     var v = num(el.value);
     if(!ok(v)) return;
     el.value = plain(v, decFor(el));
@@ -888,8 +959,13 @@
     var el = $(id);
     el.addEventListener('focus', function(){ setActive(el); });
     el.addEventListener('click', function(){ setActive(el); });
-    el.addEventListener('input', afterEdit);
+    el.addEventListener('input', function(){ if(esBanco(el)) pintarBanco(el); afterEdit(); });
     el.addEventListener('keydown', function(e){
+      if(esBanco(el)){
+        if(/^[0-9]$/.test(e.key)){ e.preventDefault(); setActive(el); insert(e.key); return; }
+        if(e.key === 'Backspace'){ e.preventDefault(); setActive(el); backspace(); return; }
+        if(e.key.length === 1){ e.preventDefault(); return; }
+      }
       if(e.key === 'Enter'){ e.preventDefault(); equals(); }
     });
   });
@@ -910,6 +986,8 @@
   press($('cur'), function(){
     var to = (curr() === 'Bs') ? '$' : 'Bs';
     $('cur').dataset.cur = to;
+    $('pay').placeholder = (to === '$') ? '0.00' : '0,00';
+    pintarBanco($('pay'));
     $('curTxt').textContent = to;
     setActive(active);
     afterEdit();
@@ -959,12 +1037,12 @@
     var v = num($('expr').value);
     if(!ok(v)){ toast('Nada que enviar'); return; }
     if(calcCur() === '$'){
-      $('price').value = plain(v, '.');
+      ponerMonto($('price'), v);
       afterEdit();
       toast('Precio: $ ' + fmtU(v, '$'));
     } else {
       if(curr() !== 'Bs'){ $('cur').dataset.cur = 'Bs'; $('curTxt').textContent = 'Bs'; }
-      $('pay').value = plain(v, ',');
+      ponerMonto($('pay'), v);
       afterEdit();
       toast('Eso es Bs: va al precio pagando en Bs');
     }
@@ -974,7 +1052,8 @@
     if(!ok(v)){ toast('Nada que enviar'); return; }
     $('cur').dataset.cur = calcCur();
     $('curTxt').textContent = calcCur();
-    $('pay').value = plain(v, decFor($('pay')));
+    $('pay').placeholder = (calcCur() === '$') ? '0.00' : '0,00';
+    ponerMonto($('pay'), v);
     afterEdit();
     toast('Pagando en Bs, visto en ' + curr() + ': ' + fmtU(v, curr()));
   });
@@ -986,7 +1065,7 @@
     KEYS.forEach(function(k){
       if(ok(rate(k))) L.push(LABEL[k] + ': ' + fmt(rate(k)) + ' Bs/$' + (isManual(k) ? ' (a mano)' : ''));
     });
-    var list = num($('price').value), desc = num($('disc').value);
+    var list = valorDe($('price')), desc = num($('disc').value);
     var payBs = parseFloat($('verdict').dataset.paybs);
     if(ok(list) && list > 0){
       L.push('Precio pagando en $: ' + fmt(list) + (ok(desc) && desc > 0 ? ' con −' + fmt(desc,1) + '% = ' + fmt(list * (1 - desc/100)) : ''));
@@ -1085,12 +1164,12 @@
 
     var R = {};
     KEYS.forEach(function(k){ R[k] = rate(k); });
-    var list = num($('price').value), desc = num($('disc').value);
+    var list = valorDe($('price')), desc = num($('disc').value);
     if(!ok(desc) || desc < 0) desc = 0;
     var net = ok(list) ? list * (1 - desc / 100) : NaN;
     var payBs = parseFloat($('verdict').dataset.paybs);
     if(!ok(payBs)){
-      var pv = num($('pay').value);
+      var pv = valorDe($('pay'));
       payBs = (ok(pv) && curr() === 'Bs') ? pv : (ok(pv) && ok(R.bcv) ? pv * R.bcv : NaN);
     }
     var hasP = ok(net) && net > 0, hasQ = ok(payBs) && payBs > 0;
