@@ -166,7 +166,11 @@
     border-radius:9px; padding:6px 11px; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap}
   .pad-head .modo:active{background:#3a3a3c}
   .solo-calc{display:none}
-  .pad.modo-calc .solo-calc{display:block}
+  /* abierta, la calculadora sube hasta tapar entero el recuadro de la tasa implícita;
+     el espacio que sobra se lo lleva la pantalla del resultado, las teclas no se mueven */
+  .pad.modo-calc{display:flex; flex-direction:column}
+  .pad.modo-calc .solo-calc{display:flex; flex-direction:column; flex:1}
+  .pad.modo-calc .resline{flex:1; align-items:flex-end}
   .disp{display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--line); padding-bottom:5px; min-width:0}
   .unit-btn{
     flex:0 0 auto; background:#3a3a3c; color:#fff; border:1px solid var(--line); border-radius:9px;
@@ -212,7 +216,7 @@
   /* escribiendo arriba: es el MISMO teclado, cada tecla en su sitio. Se apaga todo
      menos AC, números, decimal y borrar: desaparecen y dejan su hueco, nada se mueve */
   .pad.modo-arriba .key.op, .pad.modo-arriba .key.par{visibility:hidden; pointer-events:none}
-  .pad.modo-arriba .key{box-shadow:0 0 0 1px rgba(255,196,102,.55), 0 0 10px rgba(255,176,60,.25)}
+  .pad.modo-arriba .key{box-shadow:0 0 0 1px rgba(255,196,102,.75), 0 0 5px rgba(255,176,60,.35)}
 
   .toast{position:fixed; left:50%; bottom:calc(var(--pad-h, 320px) + 10px); transform:translateX(-50%); background:#fff; color:#000; font-size:12px; font-weight:700; padding:8px 16px; border-radius:20px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:9; max-width:90vw; text-align:center}
   .toast.show{opacity:.95}
@@ -503,6 +507,7 @@
     pad.classList.toggle('modo-calc', enCalc);
     pad.classList.toggle('modo-arriba', !enCalc);
     pad.classList.toggle('lit-ring', enCalc);
+    if(enCalc) window.scrollTo(0, 0);
     $('resFor').innerHTML = enCalc ? '<b>Calculadora</b>'
       : 'Escribiendo en <b>' + fieldName(active) + '</b>';
     $('btnModo').textContent = enCalc ? '▾ Volver arriba' : 'Calculadora ▴';
@@ -513,9 +518,18 @@
     medirPad();
   }
 
-  /* el alto del teclado fijo, para que el contenido de arriba nunca quede debajo */
+  /* el alto del teclado fijo, para que el contenido de arriba nunca quede debajo.
+     Con la calculadora abierta, su borde de arriba llega al del recuadro de la tasa
+     implícita: lo tapa entero, nunca a medias. */
   function medirPad(){
-    var h = $('pad').getBoundingClientRect().height;
+    var pad = $('pad');
+    if(pad.classList.contains('modo-calc')){
+      var tope = $('verdict').getBoundingClientRect().top + window.scrollY;
+      pad.style.minHeight = Math.max(0, Math.ceil(window.innerHeight - tope)) + 'px';
+    } else {
+      pad.style.minHeight = '';
+    }
+    var h = pad.getBoundingClientRect().height;
     document.documentElement.style.setProperty('--pad-h', Math.ceil(h) + 'px');
   }
   window.addEventListener('resize', medirPad);
@@ -666,10 +680,13 @@
       hp.innerHTML = hueco + esqueleto;
     }
 
+    /* en Bs: cuántos dólares son a cada tasa; en $: cuántos bolívares */
     var hq = $('hintPay');
-    if(ok(payBs) && payBs > 0){
+    if(ok(pay) && pay > 0){
       hq.innerHTML = hueco + rows(KEYS.map(function(k){
-        return {k:k, name:SHORT[k], value:(ok(R[k]) && R[k] > 0) ? '$' + fmt(payBs / R[k]) : '—'};
+        var v = R[k], out = '—';
+        if(ok(v) && v > 0) out = (cur === 'Bs') ? '$' + fmt(pay / v) : 'Bs ' + fmtS(pay * v);
+        return {k:k, name:SHORT[k], value:out};
       }));
     } else {
       hq.innerHTML = hueco + esqueleto;
@@ -888,16 +905,10 @@
     }
   }, true);
 
-  /* el botón del campo derecho NO cambia el precio: lo muestra en la otra moneda */
+  /* el botón del campo derecho NO toca el número escrito: solo dice en qué moneda
+     está, y con eso cambian las ocho cuentas de abajo */
   press($('cur'), function(){
-    var from = curr(), to = (from === 'Bs') ? '$' : 'Bs';
-    var bcv = rate('bcv');
-    var v = num($('pay').value);
-    if(ok(v) && v > 0){
-      if(!ok(bcv) || bcv <= 0){ toast('Sin tasa BCV no puedo mostrarlo en la otra moneda'); return; }
-      var conv = (to === '$') ? v / bcv : v * bcv;
-      $('pay').value = plain(Math.round(conv * 100) / 100, (to === '$') ? '.' : ',');
-    }
+    var to = (curr() === 'Bs') ? '$' : 'Bs';
     $('cur').dataset.cur = to;
     $('curTxt').textContent = to;
     setActive(active);
