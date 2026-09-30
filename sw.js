@@ -1,11 +1,11 @@
 /* Calculadolar - cache del cascaron para que abra sin senal.
    Las tasas NO se cachean aqui: van por red y su copia queda en localStorage. */
-var CACHE = 'calculadolar-v19';
+var CACHE = 'calculadolar-v20';
 var SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './calculadolar_logo.svg',
+  './calculadolar_logo_negro.svg',
   './icon-180.png',
   './icon-192.png',
   './icon-512.png'

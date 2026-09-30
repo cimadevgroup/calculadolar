@@ -19,7 +19,7 @@
     --line:#2e2e32; --txt:#fff; --dim:#8e8e93; --dim2:#636366;
     --bcv:#ff453a; --par:#30d158; --bin:#ffd60a; --byb:#5ac8fa;
     --eur:#0a84ff; --zel:#bf5af2; --ppl:#7d8cff; --prom:#c7c7cc;
-    --vinotinto:#a3243f;
+    --vinotinto:#722f37;
     --op:#ff9f0a; --warn:#ffd60a; --glow:#ffc466;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
@@ -269,8 +269,8 @@
   /* portada de carga */
   .portada{position:fixed; inset:0; z-index:30; background:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; transition:opacity .35s ease}
   .portada.fuera{opacity:0; pointer-events:none}
-  .portada .logo{width:132px; height:132px; border-radius:30px; background:#fff; display:flex; align-items:center; justify-content:center}
-  .portada .logo img{width:112px; height:112px}
+  .portada .logo{width:132px; height:132px; display:flex; align-items:center; justify-content:center}
+  .portada .logo img{width:132px; height:132px}
   .portada b{font-size:26px; font-weight:800; color:var(--vinotinto); letter-spacing:-.5px}
   .portada .carga{width:26px; height:26px; border-radius:50%; border:3px solid #ffffff22; border-top-color:var(--vinotinto); animation:gira .8s linear infinite}
   @keyframes gira{to{transform:rotate(360deg)}}
@@ -408,7 +408,7 @@
 <div class="toast" id="toast"></div>
 <div class="ad-slot" id="adSlot" aria-hidden="true"></div>
 <div class="portada" id="portada" aria-hidden="true">
-  <div class="logo"><img src="calculadolar_logo.svg" alt=""></div>
+  <div class="logo"><img src="calculadolar_logo_negro.svg" alt=""></div>
   <b>Calculadolar</b>
   <div class="carga"></div>
 </div>
@@ -527,7 +527,7 @@
   }
 
   /* sube junto con CACHE en sw.js */
-  var VERSION = '19 · 30/09/2026';
+  var VERSION = '20 · 30/09/2026';
 
   /* ---------- evaluador (sin eval) ---------- */
   function evaluate(src){
@@ -587,7 +587,7 @@
   }
 
   /* ---------- se arma la fila de tasas y los botones ---------- */
-  var PRINCIPALES = ['bcv','eur','par','bin'];
+  var PRINCIPALES = ['bcv','eur','bin','par'];
   function build(){
     var tarjeta = function(k){
       return '<div class="rate r-' + k + ' blk" id="wrap-' + k + '">' +
@@ -1401,7 +1401,7 @@
     function sub(t){ put(t, PAD + 16, 22, '400', COL.dim2); y += 32; }
 
     var d = new Date();
-    put('Calculadolar', PAD, 42, '800', '#a3243f');
+    put('Calculadolar', PAD, 42, '800', '#722f37');
     put(d.toLocaleDateString('es-VE') + '  ' + d.toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'}),
         W - PAD, 22, '600', COL.dim, 'right');
     y += 26; rule(); y += 44;
