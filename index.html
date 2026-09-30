@@ -19,6 +19,7 @@
     --line:#2e2e32; --txt:#fff; --dim:#8e8e93; --dim2:#636366;
     --bcv:#ff453a; --par:#30d158; --bin:#ffd60a; --byb:#5ac8fa;
     --eur:#0a84ff; --zel:#bf5af2; --ppl:#7d8cff; --prom:#c7c7cc;
+    --vinotinto:#a3243f;
     --op:#ff9f0a; --warn:#ffd60a; --glow:#ffc466;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
@@ -37,10 +38,11 @@
   .app{max-width:480px; margin:0 auto; display:flex; flex-direction:column; gap:8px;
         padding-bottom:calc(var(--pad-h, 320px) + 12px)}
   /* esqueleto: lo que todavía no tiene dato ocupa su lugar, así nada salta */
-  .sk{display:block; height:7px; border-radius:4px; background:#232327; margin:3.7px 0}
+  /* hueco reservado: ocupa su lugar para que nada se desplace, pero no se ve */
+  .sk{display:block; height:7px; margin:3.7px 0; visibility:hidden}
 
   header{display:flex; align-items:center; gap:8px}
-  h1{font-size:20px; font-weight:800; color:var(--bcv); margin:0; letter-spacing:-.4px}
+  h1{font-size:20px; font-weight:800; color:var(--vinotinto); margin:0; letter-spacing:-.4px; white-space:nowrap}
   .ts{font-size:9px; color:var(--dim2); font-variant-numeric:tabular-nums; margin-left:auto; text-align:right; line-height:1.35}
   .icon-btn{width:32px; height:32px; flex:0 0 auto; border:none; border-radius:50%; background:var(--card2); color:var(--dim); display:grid; place-items:center; cursor:pointer}
   .icon-btn:active{background:#3a3a3c; color:#fff}
@@ -152,7 +154,7 @@
   .advice{display:block; margin-top:6px; border-radius:11px; padding:6px 9px; border:1px solid var(--line); background:#0d0d0f; height:32px; overflow:hidden; cursor:pointer}
   .advice .info{margin-left:auto; font-size:10px; font-weight:800; opacity:.7}
   .advice.vacio .info{display:none}
-  .advice.vacio{background:transparent}
+  .advice.vacio{background:transparent; border-color:transparent}
   .advice.vacio .big{flex:1}
   .advice .head{display:flex; align-items:baseline; gap:6px; height:18px; overflow:hidden}
   .advice .big{font-size:14px; font-weight:800; letter-spacing:-.2px}
@@ -174,6 +176,7 @@
     padding:8px 10px calc(10px + env(safe-area-inset-bottom));
     box-shadow:0 -12px 30px rgba(0,0,0,.6); transition:box-shadow .18s ease;
   }
+  .pad.modo-arriba{background:var(--bg); border-color:transparent; box-shadow:none}
   .pad-head{display:flex; align-items:center; gap:8px; height:30px; margin-bottom:6px}
   .pad-head .who{font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.3px; color:var(--dim2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
   .pad-head .who b{color:var(--glow); font-weight:800}
@@ -251,7 +254,7 @@
 <div class="app">
 
   <header class="blk" id="blk-head">
-    <h1>Calculadolar</h1>
+    <h1>Calculadolar 🇻🇪</h1>
     <button class="icon-btn" id="btnShot" title="Guardar recibo" aria-label="Guardar recibo">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
     </button>
@@ -773,6 +776,8 @@
 
     var box = $('verdict');
     box.className = 'verdict blk';
+    /* sin los dos precios, el recuadro guarda su lugar pero no se ve */
+    box.style.visibility = 'hidden';
     var extra = $('impExtra');
     var adv = $('advice');
     var usable = ok(net) && net > 0 && ok(payBs) && payBs > 0 && ok(R.bcv) && R.bcv > 0;
@@ -787,6 +792,7 @@
       box.dataset.advice = '';
       return;
     }
+    box.style.visibility = '';
 
     var imp = payBs / net;
     $('impRate').innerHTML = fmt(imp) + '<small> Bs/$</small>';
@@ -1190,7 +1196,7 @@
     function sub(t){ put(t, PAD + 16, 22, '400', COL.dim2); y += 32; }
 
     var d = new Date();
-    put('Calculadolar', PAD, 42, '800', COL.bcv);
+    put('Calculadolar 🇻🇪', PAD, 42, '800', '#a3243f');
     put(d.toLocaleDateString('es-VE') + '  ' + d.toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'}),
         W - PAD, 22, '600', COL.dim, 'right');
     y += 26; rule(); y += 44;
