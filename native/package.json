@@ -1,0 +1,21 @@
+{
+  "name": "calculadolar-native",
+  "version": "1.0.0",
+  "private": true,
+  "description": "La app web de la raíz se empaqueta tal cual para iOS y Android con Capacitor. Lo nativo (anuncios) vive en native.js, que solo existe dentro de la app.",
+  "scripts": {
+    "web": "./sync-web.sh",
+    "sync": "./sync-web.sh && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx cap sync",
+    "ios": "./sync-web.sh && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx cap sync ios && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx cap open ios",
+    "android": "./sync-web.sh && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx cap sync android && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "^7.2.0",
+    "@capacitor/android": "^7.6.9",
+    "@capacitor/cli": "^7.6.9",
+    "@capacitor/core": "^7.6.9",
+    "@capacitor/ios": "^7.6.9",
+    "@capacitor/splash-screen": "^7.0.5",
+    "@capacitor/status-bar": "^7.0.6"
+  }
+}
