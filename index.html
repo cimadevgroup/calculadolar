@@ -1572,6 +1572,24 @@
   loadCache();
   try{ paint(); }catch(e){ console.error(e); }
   pintarChips();
+  /* uso anónimo: avisa que se abrió, sin ningún identificador. «hoy» marca la primera
+     apertura del día en este teléfono y «nuevo» la primera de su vida; con eso el
+     panel cuenta usuarios sin saber quién es quién. Vacío = apagado. */
+  var USO_API = '';   // se llena cuando tasas-api esté en la cuenta de Modular Mango
+  function contarUso(){
+    if(!USO_API || !window.fetch) return;
+    var hoy = new Date(Date.now() - 4 * 3600e3).toISOString().slice(0, 10), ult = null, desde = null;
+    try{ ult = localStorage.getItem('calculadolar.uso.dia'); desde = localStorage.getItem('calculadolar.uso.desde'); }catch(e){}
+    var C = window.Capacitor;
+    var plat = (C && C.isNativePlatform && C.isNativePlatform()) ? C.getPlatform() : 'web';
+    try{
+      fetch(USO_API + '/v1/uso', {method:'POST', keepalive:true, headers:{'content-type':'text/plain'},
+        body: JSON.stringify({app:'calculadolar', v: parseInt(VERSION, 10), plat: plat, hoy: ult !== hoy ? 1 : 0, nuevo: desde ? 0 : 1})
+      }).catch(function(){});
+    }catch(e){}
+    try{ localStorage.setItem('calculadolar.uso.dia', hoy); if(!desde) localStorage.setItem('calculadolar.uso.desde', hoy); }catch(e){}
+  }
+  contarUso();
   if(/[?&]ads=1/.test(location.search)) document.body.classList.add('ver-ads');
   setActive($('price'));
   ajustarTeclas();
