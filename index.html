@@ -244,7 +244,7 @@
      menos AC, números, decimal y borrar: desaparecen y dejan su hueco, nada se mueve */
   .pad.modo-arriba .key.op, .pad.modo-arriba .key.par, .pad.modo-arriba .key.imp{visibility:hidden; pointer-events:none}
   /* en un monto tipo banco el decimal lo pone la app: la tecla no aplica */
-  .pad.modo-arriba.banco #kDec{visibility:hidden; pointer-events:none}
+  .pad.modo-arriba.banco #kDec, .pad.modo-arriba #kDz{visibility:hidden; pointer-events:none}
 
   /* con la calculadora abierta, lo de arriba se apaga: los campos apenas se ven
      y el resto desaparece */
@@ -253,17 +253,29 @@
   body.calc-abierta .hint, body.calc-abierta .verdict{opacity:0; pointer-events:none}
   body.calc-abierta .cols .field-label{opacity:.12}
   body.calc-abierta .cols .field{opacity:.18}
+  /* editando una tasa, los precios y la conclusión desaparecen sin soltar su lugar;
+     tocar donde estaban devuelve al precio */
+  .cols{transition:opacity .2s ease}
+  body.tasas-activas .cols, body.tasas-activas .verdict{opacity:0; pointer-events:none}
   .pad.modo-arriba .key{box-shadow:0 0 0 1px rgba(255,196,102,.75), 0 0 5px rgba(255,176,60,.35)}
 
   .toast{position:fixed; left:50%; bottom:calc(var(--pad-h, 320px) + 10px); transform:translateX(-50%); background:#fff; color:#000; font-size:12px; font-weight:700; padding:8px 16px; border-radius:20px; line-height:1.4; opacity:0; pointer-events:none; transition:opacity .2s; z-index:9; max-width:90vw; text-align:center}
   .toast.show{opacity:.95}
+  h1{cursor:pointer}
+  .modal{position:fixed; inset:0; z-index:20; background:rgba(0,0,0,.72); display:flex; align-items:center; justify-content:center; padding:16px}
+  .modal[hidden]{display:none}
+  .modal-card{background:#1c1c1e; border:1px solid var(--line); border-radius:16px; padding:22px 20px 16px; width:100%; max-width:300px; text-align:center}
+  .modal-card h2{margin:0 0 4px; font-size:20px; font-weight:800; color:var(--vinotinto)}
+  .modal-card p{margin:8px 0; font-size:13px; color:var(--dim); line-height:1.45}
+  .modal-card .ver{font-size:12px; color:var(--dim2); font-variant-numeric:tabular-nums}
+  .modal-card button{margin-top:10px; width:100%; border:none; border-radius:10px; background:#3a3a3c; color:#fff; font-size:14px; font-weight:700; padding:10px; cursor:pointer}
 </style>
 </head>
 <body>
 <div class="app">
 
   <header class="blk" id="blk-head">
-    <h1>Calculadolar 🇻🇪</h1>
+    <h1 id="titulo" role="button" tabindex="0" aria-label="Acerca de Calculadolar">Calculadolar</h1>
     <button class="icon-btn" id="btnShot" title="Guardar recibo" aria-label="Guardar recibo">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
     </button>
@@ -375,12 +387,21 @@
       <button class="key num" data-ins="0" type="button" style="grid-area:k0">0</button>
       <button class="key num" id="kDec" data-ins="," type="button" style="grid-area:dec">,</button>
       <button class="key op" id="kEq" type="button" style="grid-area:eq">=</button>
-      <button class="key num" data-ins="00" type="button" style="grid-area:dz">00</button>
+      <button class="key num" id="kDz" data-ins="00" type="button" style="grid-area:dz">00</button>
     </div>
   </section>
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="modal" id="acerca" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="acercaT">
+    <h2 id="acercaT">Calculadolar</h2>
+    <p class="ver" id="acercaVer"></p>
+    <p>© <span id="acercaAno"></span> Modular Mango LLC.<br>Todos los derechos reservados.</p>
+    <button type="button" id="acercaOk">Cerrar</button>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -486,6 +507,9 @@
     return api[k];
   }
 
+  /* sube junto con CACHE en sw.js */
+  var VERSION = '18 · 30/09/2026';
+
   /* ---------- evaluador (sin eval) ---------- */
   function evaluate(src){
     var s = String(src).replace(/[×xX]/g,'*').replace(/[÷]/g,'/').replace(/[−–—]/g,'-').replace(/,/g,'.');
@@ -584,11 +608,13 @@
   /* Siempre hay un campo activo. Si es uno de arriba, el teclado solo enciende
      las teclas grises; si es la calculadora, se abre la calculadora entera.
      Ya no se apaga el resto de la pantalla: la conclusión tiene que verse siempre. */
-  var ultimoArriba = null;
+  var ultimoArriba = null, ultimoPrecio = null;
   function setActive(el){
     active = el || $('price');
     var enCalc = active.id === 'expr';
     if(!enCalc) ultimoArriba = active;
+    if(/^(price|pay|disc)$/.test(active.id)) ultimoPrecio = active;
+    document.body.classList.toggle('tasas-activas', KEYS.indexOf(active.id) >= 0);
     $('fld-price').classList.toggle('lit-ring', active.id === 'price' || active.id === 'disc');
     $('fld-pay').classList.toggle('lit-ring', active.id === 'pay');
     KEYS.forEach(function(k){
@@ -1094,6 +1120,11 @@
       if(t !== inp){ e.preventDefault(); inp.focus(); setActive(inp); }
       return;
     }
+    if(document.body.classList.contains('tasas-activas') && t.closest &&
+       !t.closest('header') && !t.closest('.tope') && !t.closest('.modal')){
+      e.preventDefault();
+      setActive(ultimoPrecio || $('price'));
+    }
   }, true);
 
   /* el botón del campo derecho NO toca el número escrito: solo dice en qué moneda
@@ -1145,6 +1176,14 @@
     press(b, function(){ insert(b.dataset.ins); });
   });
   press($('kDel'), backspace);
+  press($('titulo'), function(){
+    $('acercaVer').textContent = 'Versión ' + VERSION;
+    $('acercaAno').textContent = new Date().getFullYear();
+    $('acerca').hidden = false;
+  });
+  $('acerca').addEventListener('click', function(e){
+    if(e.target === $('acerca') || e.target === $('acercaOk')) $('acerca').hidden = true;
+  });
   press($('kNeg'), cambiarSigno);
   document.querySelectorAll('.key.imp').forEach(function(b){
     press(b, function(){
@@ -1300,7 +1339,7 @@
     function sub(t){ put(t, PAD + 16, 22, '400', COL.dim2); y += 32; }
 
     var d = new Date();
-    put('Calculadolar 🇻🇪', PAD, 42, '800', '#a3243f');
+    put('Calculadolar', PAD, 42, '800', '#a3243f');
     put(d.toLocaleDateString('es-VE') + '  ' + d.toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'}),
         W - PAD, 22, '600', COL.dim, 'right');
     y += 26; rule(); y += 44;
