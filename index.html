@@ -39,12 +39,23 @@
   /* esqueleto: lo que todavía no tiene dato ocupa su lugar, así nada salta */
   .sk{display:block; height:7px; border-radius:4px; background:#232327; margin:3.7px 0}
 
-  header{display:flex; align-items:center; gap:8px}
-  h1{font-size:20px; font-weight:800; color:var(--bcv); margin:0; letter-spacing:-.4px}
+  /* ---- arriba: tres tasas a la vista y un «más» con el resto y las herramientas ---- */
+  .tope{display:flex; flex-direction:column; gap:5px}
+  .rate-mas{background:var(--card); border:1px solid var(--line); border-radius:11px; color:var(--dim);
+    cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:2px; padding:4px 2px 5px; min-width:0; font-family:inherit}
+  .rate-mas b{font-size:16px; line-height:1; letter-spacing:1px}
+  .rate-mas small{font-size:7.5px; font-weight:800; text-transform:uppercase; letter-spacing:.2px}
+  .rate-mas.viejas{color:var(--warn); border-color:#ffd60a55}
+  .rate-mas[aria-expanded="true"]{color:var(--txt); border-color:#48484a}
+  .mas{display:flex; flex-direction:column; gap:5px}
+  .mas[hidden]{display:none}
+  .herr{display:flex; align-items:center; gap:6px}
+  .herr-btn{display:flex; align-items:center; gap:5px; border:1px solid var(--line); background:var(--card2);
+    color:var(--dim); border-radius:9px; padding:6px 9px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit}
+  .herr-btn:active{background:#3a3a3c; color:#fff}
+  .herr-btn.spin svg{animation:spin .8s linear infinite}
   .ts{font-size:9px; color:var(--dim2); font-variant-numeric:tabular-nums; margin-left:auto; text-align:right; line-height:1.35}
-  .icon-btn{width:32px; height:32px; flex:0 0 auto; border:none; border-radius:50%; background:var(--card2); color:var(--dim); display:grid; place-items:center; cursor:pointer}
-  .icon-btn:active{background:#3a3a3c; color:#fff}
-  .icon-btn.spin svg{animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 
   .blk{transition:opacity .18s ease}
@@ -117,14 +128,15 @@
   .hint .empty{grid-column:1 / -1; font-style:italic}
 
   /* ---- veredicto ---- */
-  .verdict{padding:9px 11px; border-radius:16px; border:1px dashed var(--line); background:var(--card); overflow:hidden}
+  .verdict{padding:8px 11px; border-radius:16px; border:1px dashed var(--line); background:var(--card); overflow:hidden}
   .vtop{display:flex; align-items:center; gap:8px; min-width:0}
-  .verdict .lbl{font-size:9px; text-transform:uppercase; letter-spacing:.5px; color:var(--dim)}
-  .verdict .val{font-size:25px; font-weight:800; line-height:1.1; font-variant-numeric:tabular-nums; letter-spacing:-.5px; white-space:nowrap}
+  .vval{display:flex; align-items:baseline; gap:6px; min-width:0}
+  .verdict .lbl{font-size:8.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--dim)}
+  .verdict .val{font-size:22px; font-weight:800; line-height:1.1; font-variant-numeric:tabular-nums; letter-spacing:-.5px; white-space:nowrap}
   .verdict .val small{font-size:11px; font-weight:500; color:var(--dim)}
   .verdict .tag{font-size:9px; font-weight:800; text-transform:uppercase; padding:4px 7px; border-radius:7px; border:1px solid var(--line); color:var(--dim); margin-left:auto; text-align:center; max-width:48%; line-height:1.25}
-  .verdict .vtop{height:42px}
-  .verdict .extra{margin-top:6px; font-size:9.5px; color:var(--dim2); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; line-height:1.5; height:29px; overflow:hidden}
+  .verdict .vtop{height:30px}
+  .verdict .extra{margin-top:3px; font-size:9.5px; color:var(--dim2); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; line-height:1.5; height:15px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
   .verdict .extra b{color:#d1d1d6}
   .verdict .extra .up{color:var(--bcv)} .verdict .extra .down{color:var(--par)}
   .verdict.ok{border-style:solid; border-color:#30d15866}
@@ -136,13 +148,15 @@
   .verdict.eur .tag{color:var(--eur); background:#0a84ff26; border-color:#0a84ff88}
 
   /* ---- la conclusión: cómo te conviene pagar ---- */
-  .advice{display:block; margin-top:8px; border-radius:12px; padding:7px 9px; border:1px solid var(--line); background:#0d0d0f; height:62px; overflow:hidden}
+  .advice{display:block; margin-top:6px; border-radius:11px; padding:6px 9px; border:1px solid var(--line); background:#0d0d0f; height:32px; overflow:hidden; cursor:pointer}
+  .advice .info{margin-left:auto; font-size:10px; font-weight:800; opacity:.7}
+  .advice.vacio .info{display:none}
   .advice.vacio{background:transparent}
   .advice.vacio .big{flex:1}
   .advice .head{display:flex; align-items:baseline; gap:6px; height:18px; overflow:hidden}
   .advice .big{font-size:14px; font-weight:800; letter-spacing:-.2px}
   .advice .save{font-size:11px; font-weight:700; font-variant-numeric:tabular-nums}
-  .advice .why{margin-top:3px; font-size:9px; color:var(--dim2); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; line-height:1.5; height:27px; overflow:hidden}
+  .advice .why{display:none}
   .advice.bs{border-color:#30d15877; background:#30d1580f}
   .advice.bs .big,.advice.bs .save{color:var(--par)}
   .advice.usd{border-color:#ffd60a77; background:#ffd60a0f}
@@ -221,35 +235,38 @@
 
   /* con la calculadora abierta, lo de arriba se apaga: los campos apenas se ven
      y el resto desaparece */
-  header, .rates, .hint, .verdict, .cols .field, .cols .field-label{transition:opacity .2s ease}
-  body.calc-abierta header, body.calc-abierta .rates,
+  .tope, .hint, .verdict, .cols .field, .cols .field-label{transition:opacity .2s ease}
+  body.calc-abierta .tope,
   body.calc-abierta .hint, body.calc-abierta .verdict{opacity:0; pointer-events:none}
   body.calc-abierta .cols .field-label{opacity:.12}
   body.calc-abierta .cols .field{opacity:.18}
   .pad.modo-arriba .key{box-shadow:0 0 0 1px rgba(255,196,102,.75), 0 0 5px rgba(255,176,60,.35)}
 
-  .toast{position:fixed; left:50%; bottom:calc(var(--pad-h, 320px) + 10px); transform:translateX(-50%); background:#fff; color:#000; font-size:12px; font-weight:700; padding:8px 16px; border-radius:20px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:9; max-width:90vw; text-align:center}
+  .toast{position:fixed; left:50%; bottom:calc(var(--pad-h, 320px) + 10px); transform:translateX(-50%); background:#fff; color:#000; font-size:12px; font-weight:700; padding:8px 16px; border-radius:20px; line-height:1.4; opacity:0; pointer-events:none; transition:opacity .2s; z-index:9; max-width:90vw; text-align:center}
   .toast.show{opacity:.95}
 </style>
 </head>
 <body>
 <div class="app">
 
-  <header class="blk" id="blk-head">
-    <h1>Calculadolar</h1>
-    <button class="icon-btn" id="btnShot" title="Guardar recibo" aria-label="Guardar recibo">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-    </button>
-    <button class="icon-btn" id="btnCopy" title="Copiar resumen" aria-label="Copiar resumen">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-    </button>
-    <button class="icon-btn" id="btnRefresh" title="Actualizar tasas" aria-label="Actualizar tasas">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
-    </button>
-    <div class="ts" id="stamp">…</div>
-  </header>
-
-  <section class="rates" id="rates"></section>
+  <section class="tope" id="tope">
+    <div class="rates" id="rates"></div>
+    <div class="mas" id="mas" hidden>
+      <div class="rates" id="ratesMas"></div>
+      <div class="herr">
+        <button class="herr-btn" id="btnShot" type="button" aria-label="Guardar recibo">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Recibo
+        </button>
+        <button class="herr-btn" id="btnCopy" type="button" aria-label="Copiar resumen">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar
+        </button>
+        <button class="herr-btn" id="btnRefresh" type="button" aria-label="Actualizar tasas">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>Tasas
+        </button>
+        <div class="ts" id="stamp">…</div>
+      </div>
+    </div>
+  </section>
 
   <section class="cols">
     <div class="blk" id="blk-price">
@@ -276,15 +293,12 @@
 
   <section class="verdict blk" id="verdict">
     <div class="vtop">
-      <div>
-        <div class="lbl">Tasa implícita</div>
-        <div class="val" id="impRate">--,--<small> Bs/$</small></div>
-      </div>
+      <div class="vval"><span class="lbl">Implícita</span><span class="val" id="impRate">--,--<small> Bs/$</small></span></div>
       <div class="tag" id="impTag">Esperando</div>
     </div>
     <div class="extra" id="impExtra"></div>
-    <div class="advice" id="advice">
-      <div class="head"><span class="big" id="adviceBig"></span><span class="save" id="adviceSave"></span></div>
+    <div class="advice" id="advice" role="button" tabindex="0" aria-label="Ver por qué">
+      <div class="head"><span class="big" id="adviceBig"></span><span class="save" id="adviceSave"></span><span class="info">ⓘ</span></div>
       <div class="why" id="adviceWhy"></div>
     </div>
   </section>
@@ -496,14 +510,18 @@
   }
 
   /* ---------- se arma la fila de tasas y los botones ---------- */
+  var PRINCIPALES = ['bcv','eur','par'];
   function build(){
-    var rows = KEYS.map(function(k){
+    var tarjeta = function(k){
       return '<div class="rate r-' + k + ' blk" id="wrap-' + k + '">' +
                '<label for="' + k + '">' + TAB[k] + '</label>' +
                '<input id="' + k + '" type="text" inputmode="none" autocomplete="off" placeholder="—" data-banco="1" aria-label="Tasa ' + LABEL[k] + '">' +
              '</div>';
-    }).join('');
-    $('rates').innerHTML = rows;
+    };
+    $('rates').innerHTML = PRINCIPALES.map(tarjeta).join('') +
+      '<button class="rate-mas" id="btnMas" type="button" aria-expanded="false" aria-controls="mas">' +
+        '<b id="masIco">⋯</b><small id="masTxt">más</small></button>';
+    $('ratesMas').innerHTML = KEYS.filter(function(k){ return PRINCIPALES.indexOf(k) < 0; }).map(tarjeta).join('');
     $('chips').innerHTML = KEYS.map(function(k){
       return '<button class="chip c-' + k + '" data-rate="' + k + '" type="button">' +
                '<span class="dir">Bs a tasa</span>' +
@@ -595,6 +613,7 @@
       $('wrap-' + k).classList.toggle('is-edited', isManual(k) && MANUAL.indexOf(k) < 0);
     });
     var st = $('stamp');
+    $('btnMas').classList.toggle('viejas', !!api.stale);
     if(api.fetchedAt){
       var d = new Date(api.fetchedAt);
       st.innerHTML = (api.stale ? 'Sin conexión · guardadas<br>' : 'Tasas de<br>') +
@@ -794,10 +813,9 @@
     var line = '<span class="' + (over > 0.05 ? 'up' : 'down') + '">' + pct(over) + '</span> sobre el BCV';
     if(desc > 0){
       var real = (1 - payBs / (list * R.bcv)) * 100;
-      line += ' · dicen −' + fmt(desc, 1) + '%';
-      if(real >= 0.05) line += ' y el real es <b class="down">−' + fmt(real, 1) + ' %</b>';
-      else if(real <= -0.05) line += ' pero pagas <b class="up">' + fmt(-real, 1) + ' % de más</b>';
-      else line += ' y el real es <b>0 %</b>';
+      if(real >= 0.05) line += ' · desc. real <b class="down">−' + fmt(real, 1) + ' %</b>';
+      else if(real <= -0.05) line += ' · con el desc. pagas <b class="up">' + fmt(-real, 1) + ' % más</b>';
+      else line += ' · desc. real <b>0 %</b>';
     }
     extra.innerHTML = line;
 
@@ -812,17 +830,17 @@
       var rel = diff / net;
       var cls, big, save, why;
       if(rel > 0.005){
-        cls = 'bs'; big = 'Te conviene pagar en Bs';
+        cls = 'bs'; big = 'Paga en Bs';
         save = 'ahorras $ ' + fmtU(diff, '$');
         why = 'Bs ' + fmtS(payBs) + ' son $ ' + fmtU(payBsInUsd, '$') +
               ' vendiendo a ' + LABEL[refK] + ' (' + fmt(refV) + '), y en efectivo te piden $ ' + fmtU(net, '$') + '.';
       } else if(rel < -0.005){
-        cls = 'usd'; big = 'Te conviene pagar en $';
+        cls = 'usd'; big = 'Paga en $';
         save = 'ahorras $ ' + fmtU(-diff, '$');
         why = 'Pagar esos Bs ' + fmtS(payBs) + ' te cuesta $ ' + fmtU(payBsInUsd, '$') +
               ' a ' + LABEL[refK] + ' (' + fmt(refV) + '), y en efectivo te piden $ ' + fmtU(net, '$') + '.';
       } else {
-        cls = 'tie'; big = 'Da igual como pagues';
+        cls = 'tie'; big = 'Da igual cómo pagues';
         save = '';
         why = 'Los dos precios salen casi iguales midiendo tu dólar a ' + LABEL[refK] + ' (' + fmt(refV) + ').';
       }
@@ -928,12 +946,12 @@
     afterEdit();
   }
 
-  function toast(msg){
+  function toast(msg, ms){
     var t = $('toast');
     t.textContent = msg;
     t.classList.add('show');
     clearTimeout(toast._t);
-    toast._t = setTimeout(function(){ t.classList.remove('show'); }, 1900);
+    toast._t = setTimeout(function(){ t.classList.remove('show'); }, ms || 1900);
   }
 
   function press(el, fn){
@@ -1059,6 +1077,21 @@
   });
 
   $('btnRefresh').addEventListener('click', fetchRates);
+  $('btnMas').addEventListener('click', function(){
+    var abrir = $('mas').hidden;
+    $('mas').hidden = !abrir;
+    $('btnMas').setAttribute('aria-expanded', abrir ? 'true' : 'false');
+    $('masIco').textContent = abrir ? '✕' : '⋯';
+    $('masTxt').textContent = abrir ? 'cerrar' : 'más';
+  });
+  function porQue(){
+    var w = $('verdict').dataset.adviceWhy;
+    if(w) toast(w, 6000);
+  }
+  $('advice').addEventListener('click', porQue);
+  $('advice').addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); porQue(); }
+  });
   $('btnCopy').addEventListener('click', function(){
     var L = [];
     L.push('Calculadolar · ' + new Date().toLocaleString('es-VE'));
