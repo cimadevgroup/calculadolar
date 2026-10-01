@@ -281,6 +281,9 @@
   .modal-card h2{margin:0 0 4px; font-size:20px; font-weight:800; color:var(--vinotinto)}
   .modal-card p{margin:8px 0; font-size:13px; color:var(--dim); line-height:1.45}
   .modal-card .ver{font-size:12px; color:var(--dim2); font-variant-numeric:tabular-nums}
+  .modal-card .compra{margin-top:12px; padding-top:12px; border-top:1px solid var(--line)}
+  .modal-card .compra .sin-ads{margin-top:0; background:var(--vinotinto)}
+  .modal-card .compra .restaurar{background:transparent; color:var(--dim); font-size:12px; padding:8px; margin-top:4px}
   .modal-card button{margin-top:10px; width:100%; border:none; border-radius:10px; background:#3a3a3c; color:#fff; font-size:14px; font-weight:700; padding:10px; cursor:pointer}
 </style>
 </head>
@@ -418,6 +421,10 @@
     <h2 id="acercaT">Calculadolar</h2>
     <p class="ver" id="acercaVer"></p>
     <p>© <span id="acercaAno"></span> Modular Mango LLC.<br>Todos los derechos reservados.</p>
+    <div class="compra" id="acercaCompra" hidden>
+      <button type="button" class="sin-ads" id="btnSinAds">Quitar anuncios</button>
+      <button type="button" class="restaurar" id="btnRestaurar">Restaurar compra</button>
+    </div>
     <button type="button" id="acercaOk">Cerrar</button>
   </div>
 </div>
@@ -1241,8 +1248,25 @@
   press($('titulo'), function(){
     $('acercaVer').textContent = 'Versión ' + VERSION;
     $('acercaAno').textContent = new Date().getFullYear();
+    // la compra «Quitar anuncios» solo existe dentro de la app de tienda
+    var tienda = window.CalcCompras;
+    $('acercaCompra').hidden = !tienda;
+    if(tienda){
+      var b = $('btnSinAds');
+      if(tienda.sinAnuncios){ b.textContent = 'Sin anuncios ✓'; b.disabled = true; }
+      else tienda.precio().then(function(p){ b.textContent = 'Quitar anuncios' + (p ? ' · ' + p : ''); });
+    }
     $('acerca').hidden = false;
   });
+  function compra(que){
+    if(!window.CalcCompras) return;
+    window.CalcCompras[que]().then(function(msg){
+      if(msg) toast(msg, 3000);
+      if(window.CalcCompras.sinAnuncios){ $('btnSinAds').textContent = 'Sin anuncios ✓'; $('btnSinAds').disabled = true; }
+    });
+  }
+  $('btnSinAds').addEventListener('click', function(){ compra('comprar'); });
+  $('btnRestaurar').addEventListener('click', function(){ compra('restaurar'); });
   $('acerca').addEventListener('click', function(e){
     if(e.target === $('acerca') || e.target === $('acercaOk')) $('acerca').hidden = true;
   });
