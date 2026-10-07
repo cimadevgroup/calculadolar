@@ -311,7 +311,7 @@
     <div class="rates2" id="rates2">
       <div class="rates" id="ratesMas"></div>
       <button class="rate-mas" id="btnMas" type="button" aria-expanded="false">
-        <b>⋯</b> Bybit · Zelle · PayPal · Promedio
+        <b>⋯</b> Paralelo · Bybit · Zelle · PayPal
       </button>
     </div>
   </section>
@@ -534,7 +534,7 @@
   }
 
   /* sube junto con CACHE en sw.js */
-  var VERSION = '20 · 30/09/2026';
+  var VERSION = '21 · 07/10/2026';
 
   /* ---------- evaluador (sin eval) ---------- */
   function evaluate(src){
@@ -594,7 +594,7 @@
   }
 
   /* ---------- se arma la fila de tasas y los botones ---------- */
-  var PRINCIPALES = ['bcv','eur','bin','par'];
+  var PRINCIPALES = ['bcv','eur','bin','prom'];
   function build(){
     var tarjeta = function(k){
       return '<div class="rate r-' + k + ' blk" id="wrap-' + k + '">' +
